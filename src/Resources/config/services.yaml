@@ -1,4 +1,4 @@
 services:
-  Dbp\Relay\CoreConnectorLdapBundle\Service\LdapService:
+  Dbp\Relay\CoreConnectorLdapBundle\Service\AuthorizationDataProvider:
     autowire: true
     autoconfigure: true

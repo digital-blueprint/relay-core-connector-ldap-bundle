@@ -7,8 +7,8 @@
         "php": ">=7.3",
         "ext-json": "*",
         "api-platform/core": "^2.6",
-        "dbp/relay-core-bundle": "^0.1.34",
-        "directorytree/ldaprecord": "^2.16",
+        "dbp/relay-core-bundle": "dev-main as 0.1.42",
+        "dbp/relay-ldap-bundle": "dev-main",
         "symfony/framework-bundle": "^5.4"
     },
     "require-dev": {
@@ -22,6 +22,12 @@
         "symfony/phpunit-bridge": "^5.4",
         "vimeo/psalm": "^4.2.1"
     },
+    "repositories": [
+        {
+            "type": "vcs",
+            "url": "git@gitlab.tugraz.at:dbp/relay/dbp-relay-ldap-bundle.git"
+        }
+    ],
     "autoload": {
         "psr-4": {
             "Dbp\\Relay\\CoreConnectorLdapBundle\\": "src/"
@@ -36,6 +42,9 @@
         "sort-packages": true,
         "platform": {
             "php": "7.3"
+        },
+        "allow-plugins": {
+            "composer/package-versions-deprecated": false
         }
     },
     "scripts": {
