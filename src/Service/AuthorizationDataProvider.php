@@ -31,9 +31,6 @@ class AuthorizationDataProvider implements AuthorizationDataProviderInterface
     private $userCache;
 
     /** @var string[] */
-    private $availableRoles;
-
-    /** @var string[] */
     private $availableAttributes;
 
     public function __construct(LdapApi $ldapApi, UserSessionInterface $userSession, EventDispatcherInterface $eventDispatcher)
@@ -43,21 +40,13 @@ class AuthorizationDataProvider implements AuthorizationDataProviderInterface
         $this->eventDispatcher = $eventDispatcher;
         $this->userCache = null;
 
-        $this->availableRoles = [];
         $this->availableAttributes = [];
     }
 
     public function setConfig(array $config)
     {
         $this->ldapConnectionIdentifier = $config[Configuration::LDAP_CONNECTION_ATTRIBUTE];
-
-        foreach ($config[Configuration::ROLES_ATTRIBUTE] as $role) {
-            $this->availableRoles[] = $role[Configuration::NAME_ATTRIBUTE];
-        }
-
-        foreach ($config[Configuration::ATTRIBUTES_ATTRIBUTE] as $attribute) {
-            $this->availableAttributes[] = $attribute[Configuration::NAME_ATTRIBUTE];
-        }
+        $this->availableAttributes = $config[Configuration::ATTRIBUTES_ATTRIBUTE];
     }
 
     public function setCache(?CacheItemPoolInterface $cachePool)
@@ -65,50 +54,40 @@ class AuthorizationDataProvider implements AuthorizationDataProviderInterface
         $this->userCache = $cachePool;
     }
 
-    public function getAvailableRoles(): array
-    {
-        return $this->availableRoles;
-    }
-
     public function getAvailableAttributes(): array
     {
         return $this->availableAttributes;
     }
 
-    public function getUserData(string $userId, array &$userRoles, array &$userAttributes): void
+    public function getUserAttributes(string $userIdentifier): array
     {
-        if (Tools::isNullOrEmpty($userId) === false) {
-            $cacheKey = $this->userSession->getSessionCacheKey().'-'.$userId;
+        $userAttributes = [];
+
+        if (Tools::isNullOrEmpty($userIdentifier) === false) {
+            $cacheKey = $this->userSession->getSessionCacheKey().'-'.$userIdentifier;
             $cacheTTL = $this->userSession->getSessionTTL() + 1;
 
             $userCacheItem = $this->userCache->getItem($cacheKey);
             if ($userCacheItem->isHit()) {
-                /** @var UserAuthorizationData */
-                $userAuthorizationData = $userCacheItem->get();
-                $userRoles = $userAuthorizationData->roles;
-                $userAttributes = $userAuthorizationData->attributes;
+                $userAttributes = $userCacheItem->get();
             } else {
-                $this->getUserDataFromLdap($userId, $userRoles, $userAttributes);
-
-                $userAuthorizationData = new UserAuthorizationData();
-                $userAuthorizationData->roles = $userRoles;
-                $userAuthorizationData->attributes = $userAttributes;
-
-                $userCacheItem->set($userAuthorizationData);
+                $userAttributes = $this->getUserDataFromLdap($userIdentifier);
+                $userCacheItem->set($userAttributes);
                 $userCacheItem->expiresAfter($cacheTTL);
                 $this->userCache->save($userCacheItem);
             }
         }
+
+        return $userAttributes;
     }
 
-    private function getUserDataFromLdap(string $userId, array &$userRoles, array &$userAttributes): void
+    private function getUserDataFromLdap(string $userIdentifier): array
     {
-        $userData = $this->ldapApi->getConnection($this->ldapConnectionIdentifier)->getUserAttributesByIdentifier($userId);
+        $userData = $this->ldapApi->getConnection($this->ldapConnectionIdentifier)->getUserAttributesByIdentifier($userIdentifier);
 
         $event = new UserDataLoadedEvent($userData);
         $this->eventDispatcher->dispatch($event, UserDataLoadedEvent::NAME);
 
-        $userRoles = $event->getUserRoles();
-        $userAttributes = $event->getUserAttributes();
+        return $event->getUserAttributes();
     }
 }

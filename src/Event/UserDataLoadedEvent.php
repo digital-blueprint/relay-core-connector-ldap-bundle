@@ -31,16 +31,6 @@ class UserDataLoadedEvent extends Event
         return $this->userData;
     }
 
-    public function setUserRoles(array $userRoles)
-    {
-        $this->userRoles = $userRoles;
-    }
-
-    public function getUserRoles(): array
-    {
-        return $this->userRoles;
-    }
-
     public function setUserAttributes(array $userAttributes)
     {
         $this->userAttributes = $userAttributes;

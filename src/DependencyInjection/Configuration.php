@@ -9,8 +9,6 @@ use Symfony\Component\Config\Definition\ConfigurationInterface;
 
 class Configuration implements ConfigurationInterface
 {
-    public const NAME_ATTRIBUTE = 'name';
-    public const ROLES_ATTRIBUTE = 'roles';
     public const ATTRIBUTES_ATTRIBUTE = 'attributes';
     public const LDAP_CONNECTION_ATTRIBUTE = 'ldap_connection';
 
@@ -20,25 +18,8 @@ class Configuration implements ConfigurationInterface
 
         $treeBuilder->getRootNode()
             ->children()
-                ->arrayNode(self::ROLES_ATTRIBUTE)
-                    ->arrayPrototype()
-                        ->children()
-                            ->scalarNode(self::NAME_ATTRIBUTE)
-                            ->info('The name of the role')
-                            ->example('ROLE_VIEWER')
-                            ->end()
-                        ->end()
-                    ->end()
-                ->end()
                 ->arrayNode(self::ATTRIBUTES_ATTRIBUTE)
-                    ->arrayPrototype()
-                        ->children()
-                            ->scalarNode(self::NAME_ATTRIBUTE)
-                                ->info('The name of the attribute')
-                                ->example('ORGANIZATION_UNITS')
-                            ->end()
-                        ->end()
-                    ->end()
+                    ->scalarPrototype()->end()
                 ->end()
                 ->scalarNode(self::LDAP_CONNECTION_ATTRIBUTE)
                     ->info('The identifier of the LDAP connection to use. See the dbp_relay_ldap config for available connections.')
