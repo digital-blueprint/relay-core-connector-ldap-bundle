@@ -238,7 +238,7 @@
             "source": {
                 "type": "git",
                 "url": "https://gitlab.tugraz.at/dbp/relay/dbp-relay-core-bundle",
-                "reference": "df80aae6ef4687cc5eae935be89cf39eaf728a33"
+                "reference": "38930a6d6c76d93dbaeae846436765b18d96474b"
             },
             "require": {
                 "api-platform/core": "^2.6.8 <2.7.0",
@@ -302,7 +302,7 @@
                 "AGPL-3.0-or-later"
             ],
             "description": "The core bundle of the Relay API gateway",
-            "time": "2022-10-23T00:56:55+00:00"
+            "time": "2022-10-24T00:52:46+00:00"
         },
         {
             "name": "dbp/relay-ldap-bundle",
