@@ -64,6 +64,11 @@ class AuthorizationDataProvider implements AuthorizationDataProviderInterface
         $userAttributes = [];
 
         if (Tools::isNullOrEmpty($userIdentifier) === false) {
+            // XXX: in case there is no session
+            if ($this->userSession->getUserIdentifier() === null) {
+                return $this->getUserDataFromLdap($userIdentifier);
+            }
+
             $cacheKey = $this->userSession->getSessionCacheKey().'-'.$userIdentifier;
             $cacheTTL = $this->userSession->getSessionTTL() + 1;
 
