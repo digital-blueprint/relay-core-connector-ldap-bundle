@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "dc0ac168e08ef4fa3e47287d5b939362",
+    "content-hash": "8953108ebe6a1695c36b69e037b67429",
     "packages": [
         {
             "name": "adldap2/adldap2",
@@ -234,11 +234,11 @@
         },
         {
             "name": "dbp/relay-core-bundle",
-            "version": "dev-main",
+            "version": "v0.1.48",
             "source": {
                 "type": "git",
                 "url": "https://gitlab.tugraz.at/dbp/relay/dbp-relay-core-bundle",
-                "reference": "159985297735ad3dfc9da00c8aa67a8530e59ff6"
+                "reference": "022cfbb04346c7dbc0b988c61246d9f3ffa53b33"
             },
             "require": {
                 "api-platform/core": "^2.6.8 <2.7.0",
@@ -283,7 +283,6 @@
                 "symfony/phpunit-bridge": "^5.4.11",
                 "vimeo/psalm": "^4.27"
             },
-            "default-branch": true,
             "type": "symfony-bundle",
             "extra": {
                 "hooks": {
@@ -302,21 +301,15 @@
                 "AGPL-3.0-or-later"
             ],
             "description": "The core bundle of the Relay API gateway",
-            "time": "2022-10-30T06:53:04+00:00"
+            "time": "2022-10-27T08:18:30+00:00"
         },
         {
             "name": "dbp/relay-ldap-bundle",
-            "version": "dev-main",
+            "version": "v0.1.0",
             "source": {
                 "type": "git",
                 "url": "git@gitlab.tugraz.at:dbp/relay/dbp-relay-ldap-bundle.git",
                 "reference": "92e2a4a0e48053e03c9a85da6d6300629782d7ce"
-            },
-            "dist": {
-                "type": "zip",
-                "url": "https://gitlab.tugraz.at/api/v4/projects/dbp%2Frelay%2Fdbp-relay-ldap-bundle/repository/archive.zip?sha=92e2a4a0e48053e03c9a85da6d6300629782d7ce",
-                "reference": "92e2a4a0e48053e03c9a85da6d6300629782d7ce",
-                "shasum": ""
             },
             "require": {
                 "adldap2/adldap2": "^10.4",
@@ -339,7 +332,6 @@
                 "symfony/phpunit-bridge": "^5.4",
                 "vimeo/psalm": "^4.2.1"
             },
-            "default-branch": true,
             "type": "symfony-bundle",
             "autoload": {
                 "psr-4": {
@@ -380,10 +372,6 @@
                 "AGPL-3.0-or-later"
             ],
             "description": "A template bundle for the Relay API gateway",
-            "support": {
-                "source": "https://gitlab.tugraz.at/dbp/relay/dbp-relay-ldap-bundle/-/tree/main",
-                "issues": "https://gitlab.tugraz.at/dbp/relay/dbp-relay-ldap-bundle/-/issues"
-            },
             "time": "2022-10-31T00:09:32+00:00"
         },
         {
@@ -10330,19 +10318,9 @@
             "time": "2015-12-17T08:42:14+00:00"
         }
     ],
-    "aliases": [
-        {
-            "package": "dbp/relay-core-bundle",
-            "version": "dev-main",
-            "alias": "0.1.42",
-            "alias_normalized": "0.1.42.0"
-        }
-    ],
+    "aliases": [],
     "minimum-stability": "stable",
-    "stability-flags": {
-        "dbp/relay-core-bundle": 20,
-        "dbp/relay-ldap-bundle": 20
-    },
+    "stability-flags": [],
     "prefer-stable": false,
     "prefer-lowest": false,
     "platform": {
@@ -10353,5 +10331,5 @@
     "platform-overrides": {
         "php": "7.3"
     },
-    "plugin-api-version": "2.3.0"
+    "plugin-api-version": "2.2.0"
 }
