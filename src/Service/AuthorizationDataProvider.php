@@ -95,7 +95,7 @@ class AuthorizationDataProvider implements AuthorizationDataProviderInterface
 
         $userAttributes = [];
         foreach ($event->getUserAttributes() as $key => $value) {
-            if (array_key_exists($key, $this->availableAttributes)) {
+            if (in_array($key, $this->availableAttributes, true)) {
                 // TODO: consider returning a default value for attributes not available for the user
                 // (to be defined in the bundle config along with available attributes)
                 $userAttributes[$key] = $value;
