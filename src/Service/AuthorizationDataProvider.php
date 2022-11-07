@@ -64,7 +64,7 @@ class AuthorizationDataProvider implements AuthorizationDataProviderInterface
         $userAttributes = [];
 
         if (Tools::isNullOrEmpty($userIdentifier) === false) {
-            // XXX: in case there is no session
+            // XXX: in case there is no session, e.g. for debug purposes
             if ($this->userSession->getUserIdentifier() === null) {
                 return $this->getUserDataFromLdap($userIdentifier);
             }
@@ -93,6 +93,15 @@ class AuthorizationDataProvider implements AuthorizationDataProviderInterface
         $event = new UserDataLoadedEvent($userData);
         $this->eventDispatcher->dispatch($event, UserDataLoadedEvent::NAME);
 
-        return $event->getUserAttributes();
+        $userAttributes = [];
+        foreach ($event->getUserAttributes() as $key => $value) {
+            if (array_key_exists($key, $this->availableAttributes)) {
+                // TODO: consider returning a default value for attributes not available for the user
+                // (to be defined in the bundle config along with available attributes)
+                $userAttributes[$key] = $value;
+            }
+        }
+
+        return $userAttributes;
     }
 }
