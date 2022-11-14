@@ -30,7 +30,7 @@ class AuthorizationDataProvider implements AuthorizationDataProviderInterface
     /** @var CacheItemPoolInterface|null */
     private $userCache;
 
-    /** @var string[] */
+    /** @var array */
     private $availableAttributes;
 
     public function __construct(LdapApi $ldapApi, UserSessionInterface $userSession, EventDispatcherInterface $eventDispatcher)
@@ -39,14 +39,12 @@ class AuthorizationDataProvider implements AuthorizationDataProviderInterface
         $this->userSession = $userSession;
         $this->eventDispatcher = $eventDispatcher;
         $this->userCache = null;
-
         $this->availableAttributes = [];
     }
 
     public function setConfig(array $config)
     {
-        $this->ldapConnectionIdentifier = $config[Configuration::LDAP_CONNECTION_ATTRIBUTE];
-        $this->availableAttributes = $config[Configuration::ATTRIBUTES_ATTRIBUTE];
+        $this->loadConfig($config);
     }
 
     public function setCache(?CacheItemPoolInterface $cachePool)
@@ -56,7 +54,7 @@ class AuthorizationDataProvider implements AuthorizationDataProviderInterface
 
     public function getAvailableAttributes(): array
     {
-        return $this->availableAttributes;
+        return array_keys($this->availableAttributes);
     }
 
     public function getUserAttributes(string $userIdentifier): array
@@ -64,8 +62,8 @@ class AuthorizationDataProvider implements AuthorizationDataProviderInterface
         $userAttributes = [];
 
         if (Tools::isNullOrEmpty($userIdentifier) === false) {
-            // XXX: in case there is no session, e.g. for debug purposes
-            if ($this->userSession->getUserIdentifier() === null) {
+            // in case there is no session, e.g. for debug purposes
+            if ($this->userSession->getUserIdentifier() === null || $this->userCache === null) {
                 return $this->getUserDataFromLdap($userIdentifier);
             }
 
@@ -94,14 +92,28 @@ class AuthorizationDataProvider implements AuthorizationDataProviderInterface
         $this->eventDispatcher->dispatch($event, UserDataLoadedEvent::NAME);
 
         $userAttributes = [];
-        foreach ($event->getUserAttributes() as $key => $value) {
-            if (in_array($key, $this->availableAttributes, true)) {
-                // TODO: consider returning a default value for attributes not available for the user
-                // (to be defined in the bundle config along with available attributes)
-                $userAttributes[$key] = $value;
-            }
+        $ldapUserAttributes = $event->getUserAttributes();
+        foreach ($this->availableAttributes as $attributeName => $attributeDefaultValue) {
+            $userAttributes[$attributeName] = $ldapUserAttributes[$attributeName] ?? $attributeDefaultValue;
         }
 
         return $userAttributes;
+    }
+
+    private function loadConfig(array $config)
+    {
+        $this->ldapConnectionIdentifier = $config[Configuration::LDAP_CONNECTION_ATTRIBUTE];
+
+        $this->availableAttributes = [];
+        foreach ($config[Configuration::ATTRIBUTES_ATTRIBUTE] as $attribute) {
+            $attributeName = $attribute[Configuration::NAME_ATTRIBUTE];
+            if (isset($this->availableAttributes[$attributeName])) {
+                throw new \RuntimeException(sprintf('multiple declaration of attribute \'%s\'', $attributeName));
+            }
+
+            $this->availableAttributes[$attributeName] = $attribute[Configuration::IS_ARRAY_ATTRIBUTE] ?
+                $attribute[Configuration::DEFAULT_VALUES_ATTRIBUTE] ?? [] :
+                $attribute[Configuration::DEFAULT_VALUE_ATTRIBUTE] ?? null;
+        }
     }
 }
