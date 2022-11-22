@@ -15,6 +15,10 @@ use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 
 class AuthorizationDataProvider implements AuthorizationDataProviderInterface
 {
+    private const DEFAULT_VALUE_KEY = 'default';
+    private const LDAP_ATTRIBUTE_KEY = 'ldap';
+    private const IS_ARRAY_KEY = 'array';
+
     /** @var LdapApi */
     private $ldapApi;
 
@@ -86,15 +90,24 @@ class AuthorizationDataProvider implements AuthorizationDataProviderInterface
 
     private function getUserDataFromLdap(string $userIdentifier): array
     {
-        $userData = $this->ldapApi->getConnection($this->ldapConnectionIdentifier)->getUserAttributesByIdentifier($userIdentifier);
+        $ldapAttributes = $this->ldapApi->getConnection($this->ldapConnectionIdentifier)->getUserAttributesByIdentifier($userIdentifier);
 
-        $event = new UserDataLoadedEvent($userData);
+        $event = new UserDataLoadedEvent($ldapAttributes);
         $this->eventDispatcher->dispatch($event, UserDataLoadedEvent::NAME);
 
         $userAttributes = [];
-        $ldapUserAttributes = $event->getUserAttributes();
-        foreach ($this->availableAttributes as $attributeName => $attributeDefaultValue) {
-            $userAttributes[$attributeName] = $ldapUserAttributes[$attributeName] ?? $attributeDefaultValue;
+        foreach ($this->availableAttributes as $attributeName => $attributeData) {
+            if (($mappedLdapAttribute = $attributeData[self::LDAP_ATTRIBUTE_KEY] ?? null) &&
+                ($attributeValue = $ldapAttributes[$mappedLdapAttribute] ?? null)) {
+                if (is_array($attributeValue)) {
+                    $attributeValue = $attributeData[self::IS_ARRAY_KEY] ? $attributeValue : $attributeValue[0];
+                } else {
+                    $attributeValue = $attributeData[self::IS_ARRAY_KEY] ? [$attributeValue] : $attributeValue;
+                }
+            } else {
+                $attributeValue = $event->getUserAttributes()[$attributeName] ?? $attributeData[self::DEFAULT_VALUE_KEY];
+            }
+            $userAttributes[$attributeName] = $attributeValue;
         }
 
         return $userAttributes;
@@ -111,9 +124,13 @@ class AuthorizationDataProvider implements AuthorizationDataProviderInterface
                 throw new \RuntimeException(sprintf('multiple declaration of attribute \'%s\'', $attributeName));
             }
 
-            $this->availableAttributes[$attributeName] = $attribute[Configuration::IS_ARRAY_ATTRIBUTE] ?
-                $attribute[Configuration::DEFAULT_VALUES_ATTRIBUTE] ?? [] :
-                $attribute[Configuration::DEFAULT_VALUE_ATTRIBUTE] ?? null;
+            $this->availableAttributes[$attributeName] = [
+                self::IS_ARRAY_KEY => $attribute[Configuration::IS_ARRAY_ATTRIBUTE],
+                self::DEFAULT_VALUE_KEY => $attribute[Configuration::IS_ARRAY_ATTRIBUTE] ?
+                    $attribute[Configuration::DEFAULT_VALUES_ATTRIBUTE] ?? [] :
+                    $attribute[Configuration::DEFAULT_VALUE_ATTRIBUTE] ?? null,
+                self::LDAP_ATTRIBUTE_KEY => $attribute[Configuration::LDAP_ATTRIBUTE_ATTRIBUTE] ?? null,
+                ];
         }
     }
 }
