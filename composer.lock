@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "8953108ebe6a1695c36b69e037b67429",
+    "content-hash": "7a8c0c10a464fb6526c732c312ca3981",
     "packages": [
         {
             "name": "adldap2/adldap2",
@@ -234,11 +234,11 @@
         },
         {
             "name": "dbp/relay-core-bundle",
-            "version": "v0.1.61",
+            "version": "v0.1.62",
             "source": {
                 "type": "git",
                 "url": "https://gitlab.tugraz.at/dbp/relay/dbp-relay-core-bundle",
-                "reference": "996fc7d43361720e3749401fd0f005ed3d97404b"
+                "reference": "4c468456c2027305e98d59e8b8ed2a6a26fd9a32"
             },
             "require": {
                 "api-platform/core": "^2.6.8 <2.7.0",
@@ -302,7 +302,7 @@
                 "AGPL-3.0-or-later"
             ],
             "description": "The core bundle of the Relay API gateway",
-            "time": "2022-11-23T12:35:13+00:00"
+            "time": "2022-11-29T14:54:53+00:00"
         },
         {
             "name": "dbp/relay-ldap-bundle",
