@@ -9,6 +9,7 @@ use Dbp\Relay\CoreBundle\Authorization\AuthorizationDataProviderInterface;
 use Dbp\Relay\CoreBundle\Helpers\Tools;
 use Dbp\Relay\CoreConnectorLdapBundle\DependencyInjection\Configuration;
 use Dbp\Relay\CoreConnectorLdapBundle\Event\UserDataLoadedEvent;
+use Dbp\Relay\LdapBundle\Common\LdapException;
 use Dbp\Relay\LdapBundle\Service\LdapApi;
 use Psr\Cache\CacheItemPoolInterface;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
@@ -61,6 +62,9 @@ class AuthorizationDataProvider implements AuthorizationDataProviderInterface
         return array_keys($this->availableAttributes);
     }
 
+    /*
+     * @throws \RuntimeException
+     */
     public function getUserAttributes(?string $userIdentifier): array
     {
         $userAttributes = [];
@@ -88,17 +92,24 @@ class AuthorizationDataProvider implements AuthorizationDataProviderInterface
         return $userAttributes;
     }
 
+    /*
+     * @throws \RuntimeException
+     */
     private function getUserDataFromLdap(string $userIdentifier): array
     {
-        $ldapAttributes = $this->ldapApi->getConnection($this->ldapConnectionIdentifier)->getUserAttributesByIdentifier($userIdentifier);
+        try {
+            $ldapAttributes = $this->ldapApi->getConnection($this->ldapConnectionIdentifier)->getUserAttributesByIdentifier($userIdentifier);
+        } catch (LdapException $exception) {
+            throw new \RuntimeException(sprintf('failed to get user data from LDAP: \'%s\'', $exception->getMessage()), 0, $exception);
+        }
 
         $event = new UserDataLoadedEvent($ldapAttributes);
-        $this->eventDispatcher->dispatch($event, UserDataLoadedEvent::NAME);
+        $this->eventDispatcher->dispatch($event);
 
         $userAttributes = [];
         foreach ($this->availableAttributes as $attributeName => $attributeData) {
-            if (($mappedLdapAttribute = $attributeData[self::LDAP_ATTRIBUTE_KEY] ?? null) &&
-                ($attributeValue = $ldapAttributes[$mappedLdapAttribute] ?? null)) {
+            if (($mappedLdapAttribute = $attributeData[self::LDAP_ATTRIBUTE_KEY] ?? null) !== null &&
+                ($attributeValue = $ldapAttributes[$mappedLdapAttribute] ?? null) !== null) {
                 if (is_array($attributeValue)) {
                     $attributeValue = $attributeData[self::IS_ARRAY_KEY] ? $attributeValue : $attributeValue[0];
                 } else {
@@ -113,6 +124,9 @@ class AuthorizationDataProvider implements AuthorizationDataProviderInterface
         return $userAttributes;
     }
 
+    /*
+     * @throws \RuntimeException
+     */
     private function loadConfig(array $config)
     {
         $this->ldapConnectionIdentifier = $config[Configuration::LDAP_CONNECTION_ATTRIBUTE];

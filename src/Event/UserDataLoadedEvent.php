@@ -8,8 +8,6 @@ use Symfony\Contracts\EventDispatcher\Event;
 
 class UserDataLoadedEvent extends Event
 {
-    public const NAME = 'dbp.relay.auth_connector_ldap_bundle.user_data_loaded';
-
     /** @var array */
     private $userData;
 
