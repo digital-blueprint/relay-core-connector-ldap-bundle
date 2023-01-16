@@ -312,6 +312,12 @@
                 "url": "git@gitlab.tugraz.at:dbp/relay/dbp-relay-ldap-bundle.git",
                 "reference": "36d942e238dc03b2e70d9c8bfee06b804099f9cf"
             },
+            "dist": {
+                "type": "zip",
+                "url": "https://gitlab.tugraz.at/api/v4/projects/dbp%2Frelay%2Fdbp-relay-ldap-bundle/repository/archive.zip?sha=36d942e238dc03b2e70d9c8bfee06b804099f9cf",
+                "reference": "36d942e238dc03b2e70d9c8bfee06b804099f9cf",
+                "shasum": ""
+            },
             "require": {
                 "adldap2/adldap2": "^10.4",
                 "api-platform/core": "^2.6",
@@ -373,7 +379,11 @@
                 "AGPL-3.0-or-later"
             ],
             "description": "A template bundle for the Relay API gateway",
-            "time": "2023-01-12T11:26:29+00:00"
+            "support": {
+                "source": "https://gitlab.tugraz.at/dbp/relay/dbp-relay-ldap-bundle/-/tree/v0.1.1",
+                "issues": "https://gitlab.tugraz.at/dbp/relay/dbp-relay-ldap-bundle/-/issues"
+            },
+            "time": "2023-01-12T12:26:29+01:00"
         },
         {
             "name": "doctrine/annotations",
@@ -6389,16 +6399,16 @@
         },
         {
             "name": "tightenco/collect",
-            "version": "v8.83.25",
+            "version": "v8.83.27",
             "source": {
                 "type": "git",
                 "url": "https://github.com/tighten/collect.git",
-                "reference": "7d2a6fc5e97c5f7209a780bea98f35042c1fd0ea"
+                "reference": "07eed6cf7441c7a69c379fdcb118eec1a1fdd0e6"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/tighten/collect/zipball/7d2a6fc5e97c5f7209a780bea98f35042c1fd0ea",
-                "reference": "7d2a6fc5e97c5f7209a780bea98f35042c1fd0ea",
+                "url": "https://api.github.com/repos/tighten/collect/zipball/07eed6cf7441c7a69c379fdcb118eec1a1fdd0e6",
+                "reference": "07eed6cf7441c7a69c379fdcb118eec1a1fdd0e6",
                 "shasum": ""
             },
             "require": {
@@ -6437,9 +6447,9 @@
             ],
             "support": {
                 "issues": "https://github.com/tighten/collect/issues",
-                "source": "https://github.com/tighten/collect/tree/v8.83.25"
+                "source": "https://github.com/tighten/collect/tree/v8.83.27"
             },
-            "time": "2022-08-22T17:55:07+00:00"
+            "time": "2023-01-13T18:05:42+00:00"
         },
         {
             "name": "twig/twig",
