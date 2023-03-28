@@ -6,6 +6,7 @@ namespace Dbp\Relay\CoreConnectorLdapBundle\Service;
 
 use Dbp\Relay\CoreBundle\API\UserSessionInterface;
 use Dbp\Relay\CoreBundle\Authorization\AuthorizationDataProviderInterface;
+use Dbp\Relay\CoreBundle\Exception\ApiError;
 use Dbp\Relay\CoreBundle\Helpers\Tools;
 use Dbp\Relay\CoreConnectorLdapBundle\DependencyInjection\Configuration;
 use Dbp\Relay\CoreConnectorLdapBundle\Event\UserDataLoadedEvent;
@@ -13,6 +14,7 @@ use Dbp\Relay\LdapBundle\Common\LdapException;
 use Dbp\Relay\LdapBundle\Service\LdapApi;
 use Psr\Cache\CacheItemPoolInterface;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
+use Symfony\Component\HttpFoundation\Response;
 
 class AuthorizationDataProvider implements AuthorizationDataProviderInterface
 {
@@ -100,7 +102,7 @@ class AuthorizationDataProvider implements AuthorizationDataProviderInterface
         try {
             $ldapAttributes = $this->ldapApi->getConnection($this->ldapConnectionIdentifier)->getUserAttributesByIdentifier($userIdentifier);
         } catch (LdapException $exception) {
-            throw new \RuntimeException(sprintf('failed to get user data from LDAP: \'%s\'', $exception->getMessage()), 0, $exception);
+            throw ApiError::withDetails(Response::HTTP_BAD_GATEWAY, sprintf('failed to get user data from LDAP: \'%s\'', $exception->getMessage()));
         }
 
         $event = new UserDataLoadedEvent($ldapAttributes);
