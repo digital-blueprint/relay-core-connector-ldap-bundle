@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "a1fbb3e9c6eb6d22324975ccabfeb552",
+    "content-hash": "e97c0e62b7f278abcbb267e98144886d",
     "packages": [
         {
             "name": "adldap2/adldap2",
@@ -328,14 +328,8 @@
             "version": "v0.1.2",
             "source": {
                 "type": "git",
-                "url": "git@gitlab.tugraz.at:dbp/relay/dbp-relay-ldap-bundle.git",
+                "url": "https://gitlab.tugraz.at/dbp/relay/dbp-relay-ldap-bundle.git",
                 "reference": "d708246e3dc94aec797a853543bfe5002f4240c0"
-            },
-            "dist": {
-                "type": "zip",
-                "url": "https://gitlab.tugraz.at/api/v4/projects/dbp%2Frelay%2Fdbp-relay-ldap-bundle/repository/archive.zip?sha=d708246e3dc94aec797a853543bfe5002f4240c0",
-                "reference": "d708246e3dc94aec797a853543bfe5002f4240c0",
-                "shasum": ""
             },
             "require": {
                 "adldap2/adldap2": "^10.4",
@@ -398,10 +392,6 @@
                 "AGPL-3.0-or-later"
             ],
             "description": "A template bundle for the Relay API gateway",
-            "support": {
-                "source": "https://gitlab.tugraz.at/dbp/relay/dbp-relay-ldap-bundle/-/tree/v0.1.2",
-                "issues": "https://gitlab.tugraz.at/dbp/relay/dbp-relay-ldap-bundle/-/issues"
-            },
             "time": "2023-05-15T12:41:13+02:00"
         },
         {

@@ -25,7 +25,7 @@
     "repositories": [
         {
             "type": "vcs",
-            "url": "git@gitlab.tugraz.at:dbp/relay/dbp-relay-ldap-bundle.git"
+            "url": "https://gitlab.tugraz.at/dbp/relay/dbp-relay-ldap-bundle.git"
         }
     ],
     "autoload": {
