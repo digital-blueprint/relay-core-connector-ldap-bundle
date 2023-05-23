@@ -2,3 +2,10 @@ services:
   Dbp\Relay\CoreConnectorLdapBundle\Service\AuthorizationDataProvider:
     autowire: true
     autoconfigure: true
+    calls:
+      - setCache: [ '@dbp.relay.core_connector_ldap.cache.user' ]
+
+  dbp.relay.core_connector_ldap.cache.user:
+    parent: cache.app
+    tags:
+      - { name: 'cache.pool', default_lifetime: 60 }
