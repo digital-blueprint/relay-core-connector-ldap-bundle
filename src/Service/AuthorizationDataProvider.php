@@ -89,6 +89,10 @@ class AuthorizationDataProvider implements AuthorizationDataProviderInterface
                 $userCacheItem->expiresAfter($cacheTTL);
                 $this->userCache->save($userCacheItem);
             }
+        } else {
+            $userAttributes = array_map(function ($attributeData) {
+                return $attributeData[self::DEFAULT_VALUE_KEY];
+            }, $this->availableAttributes);
         }
 
         return $userAttributes;

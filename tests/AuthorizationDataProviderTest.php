@@ -161,7 +161,12 @@ class AuthorizationDataProviderTest extends TestCase
 
     public function testWithoutUserId()
     {
-        $this->assertEmpty($this->authzDataProvider->getUserAttributes(null));
+        $this->assertEquals($this->authzDataProvider->getUserAttributes(null),
+            [
+            self::ROLES_ATTRIBUTE => ['DEFAULT'],
+            self::MISC_ATTRIBUTE => 0,
+            self::MISC_ARRAY_ATTRIBUTE => [1, 2, 3],
+            ]);
     }
 
     public function testUserNotFoundException()
