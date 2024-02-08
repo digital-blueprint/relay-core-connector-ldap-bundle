@@ -109,8 +109,8 @@ class AuthorizationDataProvider implements AuthorizationDataProviderInterface
 
         $userAttributes = [];
         foreach ($this->availableAttributes as $attributeName => $attributeData) {
-            if (($mappedLdapAttribute = $attributeData[self::LDAP_ATTRIBUTE_KEY] ?? null) !== null &&
-                ($attributeValue = $ldapAttributes[$mappedLdapAttribute] ?? null) !== null) {
+            if (($mappedLdapAttribute = $attributeData[self::LDAP_ATTRIBUTE_KEY] ?? null) !== null
+                && ($attributeValue = $ldapAttributes[$mappedLdapAttribute] ?? null) !== null) {
                 if (is_array($attributeValue)) {
                     $attributeValue = $attributeData[self::IS_ARRAY_KEY] ? $attributeValue : $attributeValue[0];
                 } else {
