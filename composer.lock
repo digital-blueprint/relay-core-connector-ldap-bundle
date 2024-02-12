@@ -326,11 +326,11 @@
         },
         {
             "name": "dbp/relay-ldap-bundle",
-            "version": "v0.1.5",
+            "version": "v0.1.6",
             "source": {
                 "type": "git",
                 "url": "https://gitlab.tugraz.at/dbp/relay/dbp-relay-ldap-bundle.git",
-                "reference": "64af6ae90dc82ca30da848566a457cfd735a80ca"
+                "reference": "fd0234c8514e5b5c70a422911515153ab573f076"
             },
             "require": {
                 "adldap2/adldap2": "^10.4",
@@ -338,7 +338,7 @@
                 "dbp/relay-core-bundle": "^0.1.98",
                 "ext-json": "*",
                 "guzzlehttp/guzzle": "^7.5",
-                "php": ">=7.3",
+                "php": ">=7.4",
                 "symfony/framework-bundle": "^5.4"
             },
             "require-dev": {
@@ -393,7 +393,7 @@
                 "AGPL-3.0-or-later"
             ],
             "description": "A template bundle for the Relay API gateway",
-            "time": "2023-08-18T09:25:51+00:00"
+            "time": "2024-02-08T12:16:23+00:00"
         },
         {
             "name": "doctrine/annotations",
