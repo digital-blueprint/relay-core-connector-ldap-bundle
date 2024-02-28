@@ -1,3 +1,7 @@
+# v0.1.6
+
+* Drop support for PHP 7.4/8.0
+
 # v0.1.5
 
 * Drop support for PHP 7.3
