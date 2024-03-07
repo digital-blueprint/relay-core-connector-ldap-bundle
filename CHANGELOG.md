@@ -1,3 +1,8 @@
+# v0.1.7
+
+* Add support for symfony/event-dispatcher-contracts v3
+* Add support for Symfony 6
+
 # v0.1.6
 
 * Drop support for PHP 7.4/8.0
