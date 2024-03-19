@@ -94,18 +94,18 @@ class UserAttributeProvider implements UserAttributeProviderInterface
     private function getUserDataFromLdap(string $userIdentifier): array
     {
         try {
-            $ldapAttributes = $this->ldapConnectionProvider->getConnection($this->ldapConnectionIdentifier)->getUserAttributesByIdentifier($userIdentifier);
+            $ldapEntry = $this->ldapConnectionProvider->getConnection($this->ldapConnectionIdentifier)->getEntryByIdentifier($userIdentifier);
         } catch (LdapException $exception) {
             throw ApiError::withDetails(Response::HTTP_BAD_GATEWAY, sprintf('failed to get user data from LDAP: \'%s\'', $exception->getMessage()));
         }
 
-        $event = new UserDataLoadedEvent($ldapAttributes);
+        $event = new UserDataLoadedEvent($ldapEntry->getAttributeValues());
         $this->eventDispatcher->dispatch($event);
 
         $userAttributes = [];
         foreach ($this->availableAttributes as $attributeName => $attributeData) {
             if (($mappedLdapAttribute = $attributeData[self::LDAP_ATTRIBUTE_KEY] ?? null) !== null
-                && ($attributeValue = $ldapAttributes[$mappedLdapAttribute] ?? null) !== null) {
+                && ($attributeValue = $ldapEntry->getAttributeValue($mappedLdapAttribute, null)) !== null) {
                 if (is_array($attributeValue)) {
                     $attributeValue = $attributeData[self::IS_ARRAY_KEY] ? $attributeValue : $attributeValue[0];
                 } else {

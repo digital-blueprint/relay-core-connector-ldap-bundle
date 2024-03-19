@@ -9,17 +9,17 @@ interface LdapConnectionInterface
     /*
      * @throws LdapException
      */
-    public function getUserAttributesByAttribute(string $userAttributeName, string $userAttributeValue): array;
+    public function getEntryByAttribute(string $attributeName, string $attributeValue): LdapEntryInterface;
 
     /*
      * @throws LdapException
      */
-    public function getUserAttributesByIdentifier(string $identifier): array;
+    public function getEntryByIdentifier(string $identifier): LdapEntryInterface;
 
     /**
-     * @return array[]
+     * @return LdapEntryInterface[]
      *
      * @throws LdapException
      */
-    public function getUsers(int $currentPageNumber, int $maxNumItemsPerPage, array $options = []): array;
+    public function getEntries(int $currentPageNumber, int $maxNumItemsPerPage, array $options = []): array;
 }

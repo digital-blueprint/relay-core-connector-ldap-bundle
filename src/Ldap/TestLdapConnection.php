@@ -19,35 +19,37 @@ class TestLdapConnection extends LdapConnection
         $this->testUsers = $testUsers;
     }
 
-    /**
-     * @return array[]
-     */
-    public function getUsers(int $currentPageNumber, int $maxNumItemsPerPage, array $options = []): array
+    public function getEntries(int $currentPageNumber, int $maxNumItemsPerPage, array $options = []): array
     {
         // TODO: consider filters
-        return $this->testUsers;
+        $testUsers = [];
+        foreach (array_slice($this->testUsers, ($currentPageNumber - 1) * $maxNumItemsPerPage, $maxNumItemsPerPage) as $testUser) {
+            $testUsers[] = new TestLdapEntry($testUser);
+        }
+
+        return $testUsers;
     }
 
     /*
      * @throws LdapException
      */
-    protected function getUserAttributesByAttributeInternal(string $userAttributeName, string $userAttributeValue): array
+    protected function getEntryByAttributeInternal(string $attributeName, string $attributeValue): LdapEntryInterface
     {
-        if ($userAttributeName === '') {
+        if ($attributeName === '') {
             throw new LdapException('key user attribute must not be empty', LdapException::USER_ATTRIBUTE_UNDEFINED);
         }
 
         foreach ($this->testUsers as $testUser) {
-            $testUserAttributeValue = $testUser[$userAttributeName] ?? null;
+            $testUserAttributeValue = $testUser[$attributeName] ?? null;
             if ($testUserAttributeValue === null) {
-                throw new LdapException(sprintf('user attribute \'%s\' not found', $userAttributeName));
+                throw new LdapException(sprintf('user attribute \'%s\' not found', $attributeName));
             } elseif (is_array($testUserAttributeValue) ?
-                $testUserAttributeValue[array_key_first($testUserAttributeValue)] === $userAttributeValue :
-                $testUserAttributeValue === $userAttributeValue) {
-                return $testUser;
+                $testUserAttributeValue[array_key_first($testUserAttributeValue)] === $attributeValue :
+                $testUserAttributeValue === $attributeValue) {
+                return new TestLdapEntry($testUser);
             }
         }
 
-        throw new LdapException(sprintf("User with '%s' attribute value '%s' could not be found!", $userAttributeName, $userAttributeValue), LdapException::USER_NOT_FOUND);
+        throw new LdapException(sprintf("User with '%s' attribute value '%s' could not be found!", $attributeName, $attributeValue), LdapException::USER_NOT_FOUND);
     }
 }

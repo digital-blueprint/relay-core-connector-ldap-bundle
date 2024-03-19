@@ -16,7 +16,6 @@ use LdapRecord\Configuration\ConfigurationException;
 use LdapRecord\Connection;
 use LdapRecord\Container;
 use LdapRecord\LdapRecordException;
-use LdapRecord\Models\Model;
 use LdapRecord\Models\OpenLDAP\User;
 use LdapRecord\Query\Builder;
 use Psr\Cache\CacheItemPoolInterface;
@@ -107,6 +106,11 @@ class LdapConnection implements LoggerAwareInterface, LdapConnectionInterface
         $this->loadConfig($config);
     }
 
+    /**
+     * @throws LdapRecordException
+     * @throws BindException
+     * @throws ConfigurationException
+     */
     public function checkConnection()
     {
         $this->getCachedBuilder()->first();
@@ -143,25 +147,20 @@ class LdapConnection implements LoggerAwareInterface, LdapConnectionInterface
     /*
      * @throws LdapException
      */
-    public function getUserAttributesByAttribute(string $userAttributeName, string $userAttributeValue): array
+    public function getEntryByAttribute(string $attributeName, string $attributeValue): LdapEntryInterface
     {
-        return $this->getUserAttributesByAttributeInternal($userAttributeName, $userAttributeValue);
+        return $this->getEntryByAttributeInternal($attributeName, $attributeValue);
     }
 
     /*
      * @throws LdapException
      */
-    public function getUserAttributesByIdentifier(string $identifier): array
+    public function getEntryByIdentifier(string $identifier): LdapEntryInterface
     {
-        return $this->getUserAttributesByAttributeInternal($this->identifierAttributeName, $identifier);
+        return $this->getEntryByAttributeInternal($this->identifierAttributeName, $identifier);
     }
 
-    /**
-     * @return array[]
-     *
-     * @throws LdapException
-     */
-    public function getUsers(int $currentPageNumber, int $maxNumItemsPerPage, array $options = []): array
+    public function getEntries(int $currentPageNumber, int $maxNumItemsPerPage, array $options = []): array
     {
         try {
             $query = $this->getCachedBuilder()
@@ -174,7 +173,7 @@ class LdapConnection implements LoggerAwareInterface, LdapConnectionInterface
 
             $users = [];
             foreach ($query->forPage($currentPageNumber, $maxNumItemsPerPage) as $entry) {
-                $users[] = $entry->getAttributes();
+                $users[] = new LdapEntry($entry);
             }
 
             return $users;
@@ -188,14 +187,14 @@ class LdapConnection implements LoggerAwareInterface, LdapConnectionInterface
     /*
      * @throws LdapException
      */
-    protected function getUserAttributesByAttributeInternal(string $userAttributeName, string $userAttributeValue): array
+    protected function getEntryByAttributeInternal(string $attributeName, string $attributeValue): LdapEntryInterface
     {
-        if ($userAttributeName === '') {
+        if ($attributeName === '') {
             throw new LdapException('key user attribute must not be empty',
                 LdapException::USER_ATTRIBUTE_UNDEFINED);
         }
 
-        return $this->getUserEntry($userAttributeName, $userAttributeValue)->getAttributes();
+        return $this->getEntry($attributeName, $attributeValue);
     }
 
     /**
@@ -259,21 +258,21 @@ class LdapConnection implements LoggerAwareInterface, LdapConnectionInterface
     /*
      * @throws LdapException
      */
-    private function getUserEntry(string $userAttributeName, string $userAttributeValue): Model
+    private function getEntry(string $attributeName, string $attributeValue): LdapEntryInterface
     {
         try {
             $entry = $this->getCachedBuilder()
                 ->model(new User())
                 ->whereEquals('objectClass', 'person')
-                ->whereEquals($userAttributeName, $userAttributeValue)
+                ->whereEquals($attributeName, $attributeValue)
                 ->first();
 
             if ($entry === null) {
                 throw new LdapException(sprintf("User with '%s' attribute value '%s' could not be found!",
-                    $userAttributeName, $userAttributeValue), LdapException::USER_NOT_FOUND);
+                    $attributeName, $attributeValue), LdapException::USER_NOT_FOUND);
             }
 
-            return $entry;
+            return new LdapEntry($entry);
         } catch (\Exception $exception) {
             // There was an issue binding / connecting to the server.
             throw new LdapException(sprintf('LDAP server connection failed. Message: %s', $exception->getMessage()),
