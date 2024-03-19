@@ -21,7 +21,7 @@ class UserDataLoadedTestEventSubcriber implements EventSubscriberInterface
         $userData = $event->getUserData();
 
         $userAttributes = [];
-        $userAttributes[AuthorizationDataProviderTest::MISC_ATTRIBUTE] = count($userData[AuthorizationDataProviderTest::LDAP_ROLES_ATTRIBUTE_NAME]);
+        $userAttributes[UserAttributeProviderTest::MISC_ATTRIBUTE] = count($userData[UserAttributeProviderTest::LDAP_ROLES_ATTRIBUTE_NAME]);
         $event->setUserAttributes($userAttributes);
     }
 }

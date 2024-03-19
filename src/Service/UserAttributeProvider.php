@@ -5,44 +5,39 @@ declare(strict_types=1);
 namespace Dbp\Relay\CoreConnectorLdapBundle\Service;
 
 use Dbp\Relay\CoreBundle\API\UserSessionInterface;
-use Dbp\Relay\CoreBundle\Authorization\AuthorizationDataProviderInterface;
 use Dbp\Relay\CoreBundle\Exception\ApiError;
 use Dbp\Relay\CoreBundle\Helpers\Tools;
+use Dbp\Relay\CoreBundle\User\UserAttributeProviderInterface;
 use Dbp\Relay\CoreConnectorLdapBundle\DependencyInjection\Configuration;
 use Dbp\Relay\CoreConnectorLdapBundle\Event\UserDataLoadedEvent;
-use Dbp\Relay\LdapBundle\Common\LdapException;
-use Dbp\Relay\LdapBundle\Service\LdapApi;
+use Dbp\Relay\CoreConnectorLdapBundle\Ldap\LdapConnectionProvider;
+use Dbp\Relay\CoreConnectorLdapBundle\Ldap\LdapException;
 use Psr\Cache\CacheItemPoolInterface;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\HttpFoundation\Response;
 
-class AuthorizationDataProvider implements AuthorizationDataProviderInterface
+class UserAttributeProvider implements UserAttributeProviderInterface
 {
     private const DEFAULT_VALUE_KEY = 'default';
     private const LDAP_ATTRIBUTE_KEY = 'ldap';
     private const IS_ARRAY_KEY = 'array';
 
-    /** @var LdapApi */
-    private $ldapApi;
+    private LdapConnectionProvider $ldapConnectionProvider;
 
-    /** @var string */
-    private $ldapConnectionIdentifier;
+    private string $ldapConnectionIdentifier;
 
-    /** @var UserSessionInterface */
-    private $userSession;
+    private UserSessionInterface $userSession;
 
-    /** @var EventDispatcherInterface */
-    private $eventDispatcher;
+    private EventDispatcherInterface $eventDispatcher;
 
-    /** @var CacheItemPoolInterface|null */
-    private $userCache;
+    private ?CacheItemPoolInterface $userCache;
 
-    /** @var array */
-    private $availableAttributes;
+    /** @var array[] */
+    private array $availableAttributes;
 
-    public function __construct(LdapApi $ldapApi, UserSessionInterface $userSession, EventDispatcherInterface $eventDispatcher)
+    public function __construct(LdapConnectionProvider $ldapConnectionProvider, UserSessionInterface $userSession, EventDispatcherInterface $eventDispatcher)
     {
-        $this->ldapApi = $ldapApi;
+        $this->ldapConnectionProvider = $ldapConnectionProvider;
         $this->userSession = $userSession;
         $this->eventDispatcher = $eventDispatcher;
         $this->userCache = null;
@@ -99,7 +94,7 @@ class AuthorizationDataProvider implements AuthorizationDataProviderInterface
     private function getUserDataFromLdap(string $userIdentifier): array
     {
         try {
-            $ldapAttributes = $this->ldapApi->getConnection($this->ldapConnectionIdentifier)->getUserAttributesByIdentifier($userIdentifier);
+            $ldapAttributes = $this->ldapConnectionProvider->getConnection($this->ldapConnectionIdentifier)->getUserAttributesByIdentifier($userIdentifier);
         } catch (LdapException $exception) {
             throw ApiError::withDetails(Response::HTTP_BAD_GATEWAY, sprintf('failed to get user data from LDAP: \'%s\'', $exception->getMessage()));
         }

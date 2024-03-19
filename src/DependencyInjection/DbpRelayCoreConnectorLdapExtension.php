@@ -5,7 +5,8 @@ declare(strict_types=1);
 namespace Dbp\Relay\CoreConnectorLdapBundle\DependencyInjection;
 
 use Dbp\Relay\CoreBundle\Extension\ExtensionTrait;
-use Dbp\Relay\CoreConnectorLdapBundle\Service\AuthorizationDataProvider;
+use Dbp\Relay\CoreConnectorLdapBundle\Ldap\LdapConnectionProvider;
+use Dbp\Relay\CoreConnectorLdapBundle\Service\UserAttributeProvider;
 use Symfony\Component\Config\FileLocator;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Loader\YamlFileLoader;
@@ -23,7 +24,10 @@ class DbpRelayCoreConnectorLdapExtension extends ConfigurableExtension
         );
         $loader->load('services.yaml');
 
-        $definition = $container->getDefinition(AuthorizationDataProvider::class);
-        $definition->addMethodCall('setConfig', [$mergedConfig]);
+        $definition = $container->getDefinition(UserAttributeProvider::class);
+        $definition->addMethodCall('setConfig', [$mergedConfig[Configuration::USER_ATTRIBUTE_PROVIDER_ATTRIBUTE] ?? []]);
+
+        $definition = $container->getDefinition(LdapConnectionProvider::class);
+        $definition->addMethodCall('setConfig', [$mergedConfig[Configuration::LDAP_CONNECTION_PROVIDER] ?? []]);
     }
 }

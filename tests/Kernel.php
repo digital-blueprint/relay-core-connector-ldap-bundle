@@ -7,7 +7,6 @@ namespace Dbp\Relay\CoreConnectorLdapBundle\Tests;
 use ApiPlatform\Symfony\Bundle\ApiPlatformBundle;
 use Dbp\Relay\CoreBundle\DbpRelayCoreBundle;
 use Dbp\Relay\CoreConnectorLdapBundle\DbpRelayCoreConnectorLdapBundle;
-use Dbp\Relay\LdapBundle\DbpRelayLdapBundle;
 use Nelmio\CorsBundle\NelmioCorsBundle;
 use Symfony\Bundle\FrameworkBundle\FrameworkBundle;
 use Symfony\Bundle\FrameworkBundle\Kernel\MicroKernelTrait;
@@ -31,7 +30,6 @@ class Kernel extends BaseKernel
         yield new NelmioCorsBundle();
         yield new MonologBundle();
         yield new ApiPlatformBundle();
-        yield new DbpRelayLdapBundle();
         yield new DbpRelayCoreConnectorLdapBundle();
         yield new DbpRelayCoreBundle();
     }

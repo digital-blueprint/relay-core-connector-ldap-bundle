@@ -1,9 +1,17 @@
 services:
-  Dbp\Relay\CoreConnectorLdapBundle\Service\AuthorizationDataProvider:
+  Dbp\Relay\CoreConnectorLdapBundle\Service\UserAttributeProvider:
     autowire: true
     autoconfigure: true
     calls:
       - setCache: [ '@dbp.relay.core_connector_ldap.cache.user' ]
+
+  Dbp\Relay\CoreConnectorLdapBundle\Ldap\LdapConnectionProvider:
+    autowire: true
+    autoconfigure: true
+
+  Dbp\Relay\CoreConnectorLdapBundle\Ldap\HealthCheck:
+    autowire: true
+    autoconfigure: true
 
   dbp.relay.core_connector_ldap.cache.user:
     parent: cache.app

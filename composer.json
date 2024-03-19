@@ -8,14 +8,14 @@
         "ext-json": "*",
         "api-platform/core": "^2.7.11",
         "dbp/relay-core-bundle": "^0.1.148",
-        "dbp/relay-ldap-bundle": "^0.1.9",
-        "symfony/framework-bundle": "^5.4 || ^6.4",
-        "symfony/dependency-injection": "^5.4 || ^6.4",
+        "directorytree/ldaprecord": "^3.5",
         "symfony/config": "^5.4 || ^6.4",
-        "symfony/http-foundation": "^5.4 || ^6.4",
-        "symfony/http-kernel": "^5.4 || ^6.4",
+        "symfony/dependency-injection": "^5.4 || ^6.4",
         "symfony/event-dispatcher": "^5.4 || ^6.4",
-        "symfony/event-dispatcher-contracts": "^2.5 || ^3"
+        "symfony/event-dispatcher-contracts": "^2.5 || ^3",
+        "symfony/framework-bundle": "^5.4 || ^6.4",
+        "symfony/http-foundation": "^5.4 || ^6.4",
+        "symfony/http-kernel": "^5.4 || ^6.4"
     },
     "require-dev": {
         "friendsofphp/php-cs-fixer": "^3.50",
