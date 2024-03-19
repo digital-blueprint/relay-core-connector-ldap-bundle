@@ -20,7 +20,7 @@ class Configuration implements ConfigurationInterface
     public const DEFAULT_VALUES_ATTRIBUTE = 'default_values';
     public const LDAP_CONNECTION_ATTRIBUTE = 'ldap_connection';
 
-    public const LDAP_CONNECTION_PROVIDER = 'ldap_connection_provider';
+    public const LDAP_CONNECTION_PROVIDER_ATTRIBUTE = 'ldap_connection_provider';
     public const CONNECTIONS_ATTRIBUTE = 'connections';
     public const LDAP_CONNECTION_IDENTIFIER_ATTRIBUTE = 'identifier';
     public const LDAP_HOST_ATTRIBUTE = 'host';
@@ -89,7 +89,7 @@ class Configuration implements ConfigurationInterface
 
     private static function getLdapConfigNodeDefinition(): NodeDefinition
     {
-        $treeBuilder = new TreeBuilder(self::LDAP_CONNECTION_PROVIDER);
+        $treeBuilder = new TreeBuilder(self::LDAP_CONNECTION_PROVIDER_ATTRIBUTE);
 
         return $treeBuilder->getRootNode()
             ->children()

@@ -30,7 +30,7 @@ class LdapConnection implements LoggerAwareInterface, LdapConnectionInterface
     private ?CacheItemPoolInterface $cacheItemPool;
     private int $cacheTtl;
     private array $connectionConfig = [];
-    private string $identifierAttributeName = 'cn';
+    private string $identifierAttributeName;
     private ?Connection $connection = null;
 
     private static function addFilterToQuery(Builder $queryBuilder, FilterNode $filterNode)
@@ -107,13 +107,15 @@ class LdapConnection implements LoggerAwareInterface, LdapConnectionInterface
     }
 
     /**
-     * @throws LdapRecordException
-     * @throws BindException
-     * @throws ConfigurationException
+     * @throws LdapException
      */
     public function checkConnection()
     {
-        $this->getCachedBuilder()->first();
+        try {
+            $this->getCachedBuilder()->first();
+        } catch (\Exception $exception) {
+            throw new LdapException('LDAP connection failed: '.$exception->getMessage(), LdapException::SERVER_CONNECTION_FAILED);
+        }
     }
 
     /**
