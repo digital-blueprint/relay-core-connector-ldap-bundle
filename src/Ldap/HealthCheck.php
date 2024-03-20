@@ -29,7 +29,7 @@ class HealthCheck implements CheckInterface
             $ldapConnection = $this->ldapConnectionProvider->getConnection($connectionIdentifier);
             if ($ldapConnection instanceof LdapConnection) {
                 $results[] = $this->checkMethod('Check if we can connect to the LDAP connection '.$connectionIdentifier, [$ldapConnection, 'checkConnection']);
-                $results[] = $this->checkMethod('Check if all attributes are available for '.$connectionIdentifier, [$ldapConnection, 'checkAttributesExist']);
+                $results[] = $this->checkMethod('Check if all attributes are available for '.$connectionIdentifier, [$ldapConnection, 'assertAttributesExist']);
             }
         }
 

@@ -49,7 +49,8 @@ class LdapConnectionProvider
         return $connection;
     }
 
-    public function createConnection(string $host, string $base_dn, string $username, string $password, string $encryption = 'start_tls', string $identifierAttribute = 'cn'): LdapConnectionInterface
+    public function createConnection(string $host, string $base_dn, string $username, string $password,
+        string $encryption = 'start_tls', string $objectClass = 'person', string $identifierAttribute = 'cn'): LdapConnectionInterface
     {
         $connectionConfig = [
             Configuration::LDAP_HOST_ATTRIBUTE => $host,
@@ -57,9 +58,8 @@ class LdapConnectionProvider
             Configuration::LDAP_USERNAME_ATTRIBUTE => $username,
             Configuration::LDAP_PASSWORD_ATTRIBUTE => $password,
             Configuration::LDAP_ENCRYPTION_ATTRIBUTE => $encryption,
-            Configuration::LDAP_ATTRIBUTES_ATTRIBUTE => [
-                Configuration::LDAP_ATTRIBUTES_IDENTIFIER_ATTRIBUTE => $identifierAttribute,
-            ],
+            Configuration::LDAP_OBJECT_CLASS_ATTRIBUTE => $objectClass,
+            Configuration::LDAP_IDENTIFIER_ATTRIBUTE_ATTRIBUTE => $identifierAttribute,
         ];
 
         return new LdapConnection($connectionConfig);

@@ -16,6 +16,8 @@ interface LdapConnectionInterface
      */
     public function getEntryByIdentifier(string $identifier): LdapEntryInterface;
 
+    public function getIdentifierAttributeName(): string;
+
     /**
      * @return LdapEntryInterface[]
      *

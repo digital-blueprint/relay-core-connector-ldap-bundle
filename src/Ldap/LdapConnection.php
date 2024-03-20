@@ -31,6 +31,7 @@ class LdapConnection implements LoggerAwareInterface, LdapConnectionInterface
     private int $cacheTtl;
     private array $connectionConfig = [];
     private string $identifierAttributeName;
+    private string $objectClass;
     private ?Connection $connection = null;
 
     private static function addFilterToQuery(Builder $queryBuilder, FilterNode $filterNode)
@@ -121,11 +122,11 @@ class LdapConnection implements LoggerAwareInterface, LdapConnectionInterface
     /**
      * @throws LdapException
      */
-    public function checkAttributesExist(): void
+    public function assertAttributesExist(array $attributes = []): void
     {
-        $attributes = [
-            $this->identifierAttributeName,
-        ];
+        if ($attributes === []) {
+            $attributes[] = $this->identifierAttributeName;
+        }
 
         $missing = [];
         foreach ($attributes as $attribute) {
@@ -160,6 +161,11 @@ class LdapConnection implements LoggerAwareInterface, LdapConnectionInterface
     public function getEntryByIdentifier(string $identifier): LdapEntryInterface
     {
         return $this->getEntryByAttributeInternal($this->identifierAttributeName, $identifier);
+    }
+
+    public function getIdentifierAttributeName(): string
+    {
+        return $this->identifierAttributeName;
     }
 
     public function getEntries(int $currentPageNumber, int $maxNumItemsPerPage, array $options = []): array
@@ -206,7 +212,7 @@ class LdapConnection implements LoggerAwareInterface, LdapConnectionInterface
     {
         try {
             $entry = $this->getCachedBuilder()
-                ->whereEquals('objectClass', 'person')
+                ->whereEquals('objectClass', $this->objectClass)
                 ->whereHas($attribute)
                 ->first();
         } catch (\Exception $exception) {
@@ -265,7 +271,7 @@ class LdapConnection implements LoggerAwareInterface, LdapConnectionInterface
         try {
             $entry = $this->getCachedBuilder()
                 ->model(new User())
-                ->whereEquals('objectClass', 'person')
+                ->whereEquals('objectClass', $this->objectClass)
                 ->whereEquals($attributeName, $attributeValue)
                 ->first();
 
@@ -285,7 +291,9 @@ class LdapConnection implements LoggerAwareInterface, LdapConnectionInterface
     private function loadConfig(array $config)
     {
         $this->identifierAttributeName =
-            $config[Configuration::LDAP_ATTRIBUTES_ATTRIBUTE][Configuration::LDAP_ATTRIBUTES_IDENTIFIER_ATTRIBUTE] ?? 'cn';
+            $config[Configuration::LDAP_IDENTIFIER_ATTRIBUTE_ATTRIBUTE] ?? 'cn';
+        $this->objectClass =
+            $config[Configuration::LDAP_OBJECT_CLASS_ATTRIBUTE] ?? 'person';
 
         $this->connectionConfig = [
             'hosts' => [$config[Configuration::LDAP_HOST_ATTRIBUTE] ?? ''],

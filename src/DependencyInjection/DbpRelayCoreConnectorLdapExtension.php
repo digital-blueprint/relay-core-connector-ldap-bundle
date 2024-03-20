@@ -29,7 +29,7 @@ class DbpRelayCoreConnectorLdapExtension extends ConfigurableExtension
         $definition->addMethodCall('setConfig', [$mergedConfig[Configuration::USER_ATTRIBUTE_PROVIDER_ATTRIBUTE] ?? []]);
 
         $ldapCaches = [];
-        foreach ($mergedConfig[Configuration::LDAP_CONNECTION_PROVIDER_ATTRIBUTE][Configuration::CONNECTIONS_ATTRIBUTE] ?? [] as $connection) {
+        foreach ($mergedConfig[Configuration::CONNECTIONS_ATTRIBUTE] ?? [] as $connection) {
             $connectionIdentifier = $connection[Configuration::LDAP_CONNECTION_IDENTIFIER_ATTRIBUTE];
             $cacheTtl = $connection[Configuration::LDAP_CACHE_TTL_ATTRIBUTE];
             if ($cacheTtl > 0) {
@@ -41,7 +41,7 @@ class DbpRelayCoreConnectorLdapExtension extends ConfigurableExtension
         }
 
         $definition = $container->getDefinition(LdapConnectionProvider::class);
-        $definition->addMethodCall('setConfig', [$mergedConfig[Configuration::LDAP_CONNECTION_PROVIDER_ATTRIBUTE] ?? []]);
+        $definition->addMethodCall('setConfig', [$mergedConfig]);
         $definition->addMethodCall('setCaches', [$ldapCaches]);
     }
 }

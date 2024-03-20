@@ -38,7 +38,7 @@ class UserAttributeProviderTest extends TestCase
         $ldapApi = new LdapConnectionProvider();
         $ldapApi->addTestConnection(self::TEST_CONNECTION_IDENTIFIER, [
             'encryption' => 'simple_tls',
-            'attributes' => ['identifier' => self::LDAP_IDENTIFIER_ATTRIBUTE_NAME],
+            'identifier_attribute' => self::LDAP_IDENTIFIER_ATTRIBUTE_NAME,
             ], $testUsers);
 
         $this->eventDispatcher = new EventDispatcher();

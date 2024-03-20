@@ -20,7 +20,6 @@ class Configuration implements ConfigurationInterface
     public const DEFAULT_VALUES_ATTRIBUTE = 'default_values';
     public const LDAP_CONNECTION_ATTRIBUTE = 'ldap_connection';
 
-    public const LDAP_CONNECTION_PROVIDER_ATTRIBUTE = 'ldap_connection_provider';
     public const CONNECTIONS_ATTRIBUTE = 'connections';
     public const LDAP_CONNECTION_IDENTIFIER_ATTRIBUTE = 'identifier';
     public const LDAP_HOST_ATTRIBUTE = 'host';
@@ -28,8 +27,8 @@ class Configuration implements ConfigurationInterface
     public const LDAP_USERNAME_ATTRIBUTE = 'username';
     public const LDAP_PASSWORD_ATTRIBUTE = 'password';
     public const LDAP_ENCRYPTION_ATTRIBUTE = 'encryption';
-    public const LDAP_ATTRIBUTES_ATTRIBUTE = 'attributes';
-    public const LDAP_ATTRIBUTES_IDENTIFIER_ATTRIBUTE = 'identifier';
+    public const LDAP_IDENTIFIER_ATTRIBUTE_ATTRIBUTE = 'identifier_attribute';
+    public const LDAP_OBJECT_CLASS_ATTRIBUTE = 'object_class';
     public const LDAP_CACHE_TTL_ATTRIBUTE = 'cache_ttl';
 
     public function getConfigTreeBuilder(): TreeBuilder
@@ -89,45 +88,43 @@ class Configuration implements ConfigurationInterface
 
     private static function getLdapConfigNodeDefinition(): NodeDefinition
     {
-        $treeBuilder = new TreeBuilder(self::LDAP_CONNECTION_PROVIDER_ATTRIBUTE);
+        $treeBuilder = new TreeBuilder(self::CONNECTIONS_ATTRIBUTE);
 
+        /** @phpstan-ignore-next-line */
         return $treeBuilder->getRootNode()
-            ->children()
-                ->arrayNode(self::CONNECTIONS_ATTRIBUTE)
-                    ->arrayPrototype()
-                        ->children()
-                            ->scalarNode(self::LDAP_CONNECTION_IDENTIFIER_ATTRIBUTE)
-                              ->cannotBeEmpty()
-                              ->isRequired()
-                            ->end()
-                            ->scalarNode(self::LDAP_HOST_ATTRIBUTE)
-                              ->cannotBeEmpty()
-                              ->isRequired()
-                            ->end()
-                            ->scalarNode(self::LDAP_BASE_DN_ATTRIBUTE)
-                            ->end()
-                            ->scalarNode(self::LDAP_USERNAME_ATTRIBUTE)
-                            ->end()
-                            ->scalarNode(self::LDAP_PASSWORD_ATTRIBUTE)
-                            ->end()
-                            ->enumNode(self::LDAP_ENCRYPTION_ATTRIBUTE)
-                                ->info('simple_tls uses port 636 and is sometimes referred to as "SSL", start_tls uses port 389 and is sometimes referred to as "TLS", plain means none')
-                                ->values(['start_tls', 'simple_tls', 'plain'])
-                                ->defaultValue('start_tls')
-                            ->end()
-                            ->arrayNode(self::LDAP_ATTRIBUTES_ATTRIBUTE)
-                                ->children()
-                                  ->scalarNode(self::LDAP_ATTRIBUTES_IDENTIFIER_ATTRIBUTE)->end()
-                                ->end()
-                            ->end()
-                            ->integerNode(self::LDAP_CACHE_TTL_ATTRIBUTE)
-                              ->info('cache ttl. 0 indicates no caching.')
-                              ->defaultValue(0)
-                            ->end()
+                ->arrayPrototype()
+                    ->children()
+                        ->scalarNode(self::LDAP_CONNECTION_IDENTIFIER_ATTRIBUTE)
+                          ->cannotBeEmpty()
+                          ->isRequired()
+                        ->end()
+                        ->scalarNode(self::LDAP_HOST_ATTRIBUTE)
+                          ->cannotBeEmpty()
+                          ->isRequired()
+                        ->end()
+                        ->scalarNode(self::LDAP_BASE_DN_ATTRIBUTE)
+                        ->end()
+                        ->scalarNode(self::LDAP_USERNAME_ATTRIBUTE)
+                        ->end()
+                        ->scalarNode(self::LDAP_PASSWORD_ATTRIBUTE)
+                        ->end()
+                        ->enumNode(self::LDAP_ENCRYPTION_ATTRIBUTE)
+                            ->info('simple_tls uses port 636 and is sometimes referred to as "SSL", start_tls uses port 389 and is sometimes referred to as "TLS", plain means none')
+                            ->values(['start_tls', 'simple_tls', 'plain'])
+                            ->defaultValue('start_tls')
+                        ->end()
+                        ->scalarNode(self::LDAP_IDENTIFIER_ATTRIBUTE_ATTRIBUTE)
+                          ->defaultValue('cn')
+                        ->end()
+                        ->scalarNode(self::LDAP_OBJECT_CLASS_ATTRIBUTE)
+                        ->defaultValue('person')
+                        ->end()
+                        ->integerNode(self::LDAP_CACHE_TTL_ATTRIBUTE)
+                          ->info('cache ttl. 0 indicates no caching.')
+                          ->defaultValue(0)
                         ->end()
                     ->end()
                 ->end()
-            ->end()
         ;
     }
 }
