@@ -140,7 +140,7 @@ class UserAttributeProvider implements UserAttributeProviderInterface
                     $attribute[Configuration::DEFAULT_VALUES_ATTRIBUTE] ?? [] :
                     $attribute[Configuration::DEFAULT_VALUE_ATTRIBUTE] ?? null,
                 self::LDAP_ATTRIBUTE_KEY => $attribute[Configuration::LDAP_ATTRIBUTE_ATTRIBUTE] ?? null,
-                ];
+            ];
         }
     }
 }
