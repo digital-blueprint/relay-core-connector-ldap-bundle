@@ -39,7 +39,7 @@ class UserAttributeProviderTest extends TestCase
         $ldapApi->addTestConnection(self::TEST_CONNECTION_IDENTIFIER, [
             'encryption' => 'simple_tls',
             'identifier_attribute' => self::LDAP_IDENTIFIER_ATTRIBUTE_NAME,
-            ], $testUsers);
+        ], $testUsers);
 
         $this->eventDispatcher = new EventDispatcher();
 
@@ -161,9 +161,9 @@ class UserAttributeProviderTest extends TestCase
     {
         $this->assertEquals($this->userAttributeProvider->getUserAttributes(null),
             [
-            self::ROLES_ATTRIBUTE => ['DEFAULT'],
-            self::MISC_ATTRIBUTE => 0,
-            self::MISC_ARRAY_ATTRIBUTE => [1, 2, 3],
+                self::ROLES_ATTRIBUTE => ['DEFAULT'],
+                self::MISC_ATTRIBUTE => 0,
+                self::MISC_ARRAY_ATTRIBUTE => [1, 2, 3],
             ]);
     }
 
@@ -178,10 +178,10 @@ class UserAttributeProviderTest extends TestCase
         $config = $this->createConfig();
         // add duplicate attribute entry
         $config[Configuration::USER_ATTRIBUTE_PROVIDER_ATTRIBUTE][Configuration::ATTRIBUTES_ATTRIBUTE][] = [
-                Configuration::NAME_ATTRIBUTE => self::ROLES_ATTRIBUTE,
-                Configuration::IS_ARRAY_ATTRIBUTE => true,
-                Configuration::LDAP_ATTRIBUTE_ATTRIBUTE => self::LDAP_ROLES_ATTRIBUTE_NAME,
-            ];
+            Configuration::NAME_ATTRIBUTE => self::ROLES_ATTRIBUTE,
+            Configuration::IS_ARRAY_ATTRIBUTE => true,
+            Configuration::LDAP_ATTRIBUTE_ATTRIBUTE => self::LDAP_ROLES_ATTRIBUTE_NAME,
+        ];
         $this->expectException(\RuntimeException::class);
         $this->userAttributeProvider->setConfig($config[Configuration::USER_ATTRIBUTE_PROVIDER_ATTRIBUTE]);
     }
