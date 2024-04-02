@@ -72,7 +72,7 @@ class LdapConnectionProvider implements LoggerAwareInterface
         return new LdapConnection($connectionConfig);
     }
 
-    public function addTestConnection(string $connectionIdentifier, array $config = [], array $testUsers = []): LdapConnectionInterface
+    public function addTestConnection(string $connectionIdentifier, array $config = [], array $testUsers = []): TestLdapConnection
     {
         $testLdapConnection = new TestLdapConnection($config, $testUsers);
         $this->connections[$connectionIdentifier] = $testLdapConnection;
