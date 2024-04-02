@@ -164,12 +164,7 @@ class LdapConnection implements LoggerAwareInterface, LdapConnectionInterface
      */
     public function getEntries(int $currentPageNumber, int $maxNumItemsPerPage, array $options = []): array
     {
-        $entries = [];
-        foreach ($this->getEntriesInternal($currentPageNumber, $maxNumItemsPerPage, $options) as $entry) {
-            $entries[] = new LdapEntry($entry);
-        }
-
-        return $entries;
+        return $this->getEntriesInternal($currentPageNumber, $maxNumItemsPerPage, $options);
     }
 
     /*
@@ -209,7 +204,12 @@ class LdapConnection implements LoggerAwareInterface, LdapConnectionInterface
                 $results = $query->forPage($currentPageNumber, $maxNumItemsPerPage);
             }
 
-            return $results;
+            $entries = [];
+            foreach ($results as $entry) {
+                $entries[] = new LdapEntry($entry);
+            }
+
+            return $entries;
         } catch (\Exception $exception) {
             // There was an issue binding / connecting to the server.
             throw new LdapException(sprintf('LDAP query failed. Message: %s', $exception->getMessage()),
