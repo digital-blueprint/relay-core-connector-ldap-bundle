@@ -196,6 +196,8 @@ class LdapConnection implements LoggerAwareInterface, LdapConnectionInterface
 
             $sorting = Options::getSorting($options);
             if ($sorting && $sortField = ($sorting->getSortFields()[0] ?? null)) {
+                // WORKAROUND: we do the sorting manually here, since we currently don't know if the LDAP server supports sorting.
+                // TODO: find a way to find out whether the LDAP server supports sorting
                 $allResults = $query->get();
                 $allResults = $allResults->sortBy(Sorting::getPath($sortField), \SORT_REGULAR,
                     Sorting::getDirection($sortField) === Sorting::DIRECTION_DESCENDING);
