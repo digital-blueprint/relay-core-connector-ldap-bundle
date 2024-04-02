@@ -159,39 +159,17 @@ class LdapConnection implements LoggerAwareInterface, LdapConnectionInterface
         return $this->getEntryByAttributeInternal($attributeName, $attributeValue);
     }
 
+    /**
+     * @throws LdapException
+     */
     public function getEntries(int $currentPageNumber, int $maxNumItemsPerPage, array $options = []): array
     {
-        try {
-            $query = $this->getCachedBuilder()
-                ->model(new User())
-                ->whereEquals('objectClass', $this->objectClass);
-
-            if ($filter = Options::getFilter($options)) {
-                self::addFilterToQuery($query, $filter->getRootNode());
-            }
-
-            $sorting = Options::getSorting($options);
-            if ($sorting && $sortField = ($sorting->getSortFields()[0] ?? null)) {
-                dump('sorting by '.Sorting::getPath($sortField));
-                $allResults = $query->get();
-                $allResults = $allResults->sortBy(Sorting::getPath($sortField), \SORT_REGULAR,
-                    Sorting::getDirection($sortField) === Sorting::DIRECTION_DESCENDING);
-                $results = $allResults->forPage($currentPageNumber, $maxNumItemsPerPage);
-            } else {
-                $results = $query->forPage($currentPageNumber, $maxNumItemsPerPage);
-            }
-
-            $users = [];
-            foreach ($results as $entry) {
-                $users[] = new LdapEntry($entry);
-            }
-
-            return $users;
-        } catch (\Exception $exception) {
-            // There was an issue binding / connecting to the server.
-            throw new LdapException(sprintf('LDAP query failed. Message: %s', $exception->getMessage()),
-                LdapException::SERVER_CONNECTION_FAILED);
+        $entries = [];
+        foreach ($this->getEntriesInternal($currentPageNumber, $maxNumItemsPerPage, $options) as $entry) {
+            $entries[] = new LdapEntry($entry);
         }
+
+        return $entries;
     }
 
     /*
@@ -205,6 +183,38 @@ class LdapConnection implements LoggerAwareInterface, LdapConnectionInterface
         }
 
         return $this->getEntry($attributeName, $attributeValue);
+    }
+
+    /**
+     * @throws LdapException
+     */
+    protected function getEntriesInternal(int $currentPageNumber, int $maxNumItemsPerPage, array $options = []): array
+    {
+        try {
+            $query = $this->getCachedBuilder()
+                ->model(new User())
+                ->whereEquals('objectClass', $this->objectClass);
+
+            if ($filter = Options::getFilter($options)) {
+                self::addFilterToQuery($query, $filter->getRootNode());
+            }
+
+            $sorting = Options::getSorting($options);
+            if ($sorting && $sortField = ($sorting->getSortFields()[0] ?? null)) {
+                $allResults = $query->get();
+                $allResults = $allResults->sortBy(Sorting::getPath($sortField), \SORT_REGULAR,
+                    Sorting::getDirection($sortField) === Sorting::DIRECTION_DESCENDING);
+                $results = $allResults->forPage($currentPageNumber, $maxNumItemsPerPage);
+            } else {
+                $results = $query->forPage($currentPageNumber, $maxNumItemsPerPage);
+            }
+
+            return $results;
+        } catch (\Exception $exception) {
+            // There was an issue binding / connecting to the server.
+            throw new LdapException(sprintf('LDAP query failed. Message: %s', $exception->getMessage()),
+                LdapException::SERVER_CONNECTION_FAILED);
+        }
     }
 
     /**

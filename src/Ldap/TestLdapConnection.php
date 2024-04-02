@@ -4,6 +4,10 @@ declare(strict_types=1);
 
 namespace Dbp\Relay\CoreConnectorLdapBundle\Ldap;
 
+use Dbp\Relay\CoreBundle\Rest\Options;
+use Dbp\Relay\CoreBundle\Rest\Query\Sorting\Sorting;
+use Illuminate\Support\Collection;
+
 /**
  * Test LDAP connection used for unit testing.
  */
@@ -29,11 +33,20 @@ class TestLdapConnection extends LdapConnection
         $this->testEntries = $testEntries;
     }
 
-    public function getEntries(int $currentPageNumber, int $maxNumItemsPerPage, array $options = []): array
+    protected function getEntriesInternal(int $currentPageNumber, int $maxNumItemsPerPage, array $options = []): array
     {
         // TODO: consider filters
+        $sorting = Options::getSorting($options);
+        if ($sorting && $sortField = ($sorting->getSortFields()[0] ?? null)) {
+            $testEntryCollection = new Collection($this->testEntries);
+            $allResults = $testEntryCollection->sortBy(Sorting::getPath($sortField), \SORT_REGULAR,
+                Sorting::getDirection($sortField) === Sorting::DIRECTION_DESCENDING)->toArray();
+        } else {
+            $allResults = $this->testEntries;
+        }
+
         $testUsers = [];
-        foreach (array_slice($this->testEntries, ($currentPageNumber - 1) * $maxNumItemsPerPage, $maxNumItemsPerPage) as $testUser) {
+        foreach (array_slice($allResults, ($currentPageNumber - 1) * $maxNumItemsPerPage, $maxNumItemsPerPage) as $testUser) {
             $testUsers[] = new TestLdapEntry($testUser);
         }
 
