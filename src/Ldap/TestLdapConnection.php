@@ -10,20 +10,30 @@ namespace Dbp\Relay\CoreConnectorLdapBundle\Ldap;
 class TestLdapConnection extends LdapConnection
 {
     /** @var array[] */
-    private array $testUsers;
+    private array $testEntries;
 
-    public function __construct(array $config, array $testUsers = [])
+    public function __construct(array $config = [], array $testEntries = [])
     {
         parent::__construct($config);
 
-        $this->testUsers = $testUsers;
+        $this->testEntries = $testEntries;
+    }
+
+    public function getTestEntries(): array
+    {
+        return $this->testEntries;
+    }
+
+    public function setTestEntries(array $testEntries): void
+    {
+        $this->testEntries = $testEntries;
     }
 
     public function getEntries(int $currentPageNumber, int $maxNumItemsPerPage, array $options = []): array
     {
         // TODO: consider filters
         $testUsers = [];
-        foreach (array_slice($this->testUsers, ($currentPageNumber - 1) * $maxNumItemsPerPage, $maxNumItemsPerPage) as $testUser) {
+        foreach (array_slice($this->testEntries, ($currentPageNumber - 1) * $maxNumItemsPerPage, $maxNumItemsPerPage) as $testUser) {
             $testUsers[] = new TestLdapEntry($testUser);
         }
 
@@ -39,7 +49,7 @@ class TestLdapConnection extends LdapConnection
             throw new LdapException('key user attribute must not be empty', LdapException::USER_ATTRIBUTE_UNDEFINED);
         }
 
-        foreach ($this->testUsers as $testUser) {
+        foreach ($this->testEntries as $testUser) {
             $testUserAttributeValue = $testUser[$attributeName] ?? null;
             if ($testUserAttributeValue === null) {
                 throw new LdapException(sprintf('user attribute \'%s\' not found', $attributeName));

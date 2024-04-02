@@ -10,6 +10,7 @@ use Dbp\Relay\CoreBundle\Rest\Query\Filter\Nodes\LogicalNode as LogicalFilterNod
 use Dbp\Relay\CoreBundle\Rest\Query\Filter\Nodes\Node as FilterNode;
 use Dbp\Relay\CoreBundle\Rest\Query\Filter\Nodes\NodeType as FilterNodeType;
 use Dbp\Relay\CoreBundle\Rest\Query\Filter\Nodes\OperatorType as FilterOperatorType;
+use Dbp\Relay\CoreBundle\Rest\Query\Sorting\Sorting;
 use Dbp\Relay\CoreConnectorLdapBundle\DependencyInjection\Configuration;
 use LdapRecord\Auth\BindException;
 use LdapRecord\Configuration\ConfigurationException;
@@ -30,7 +31,6 @@ class LdapConnection implements LoggerAwareInterface, LdapConnectionInterface
     private ?CacheItemPoolInterface $cacheItemPool;
     private int $cacheTtl;
     private array $connectionConfig = [];
-    private string $identifierAttributeName;
     private string $objectClass;
     private ?Connection $connection = null;
 
@@ -99,6 +99,14 @@ class LdapConnection implements LoggerAwareInterface, LdapConnectionInterface
         }
     }
 
+    private static function addSortingToQuery(Builder $queryBuilder, Sorting $sorting)
+    {
+        foreach ($sorting->getSortFields() as $sortField) {
+            $queryBuilder->orderBy(Sorting::getPath($sortField),
+                Sorting::getDirection($sortField) === Sorting::DIRECTION_ASCENDING ? 'asc' : 'desc');
+        }
+    }
+
     public function __construct(array $config, ?CacheItemPoolInterface $cacheItemPool = null, int $ttl = 0)
     {
         $this->cacheItemPool = $ttl > 0 ? $cacheItemPool : null;
@@ -124,10 +132,6 @@ class LdapConnection implements LoggerAwareInterface, LdapConnectionInterface
      */
     public function assertAttributesExist(array $attributes = []): void
     {
-        if ($attributes === []) {
-            $attributes[] = $this->identifierAttributeName;
-        }
-
         $missing = [];
         foreach ($attributes as $attribute) {
             if ($attribute !== '' && !$this->checkAttributeExists($attribute)) {
@@ -155,32 +159,30 @@ class LdapConnection implements LoggerAwareInterface, LdapConnectionInterface
         return $this->getEntryByAttributeInternal($attributeName, $attributeValue);
     }
 
-    /*
-     * @throws LdapException
-     */
-    public function getEntryByIdentifier(string $identifier): LdapEntryInterface
-    {
-        return $this->getEntryByAttributeInternal($this->identifierAttributeName, $identifier);
-    }
-
-    public function getIdentifierAttributeName(): string
-    {
-        return $this->identifierAttributeName;
-    }
-
     public function getEntries(int $currentPageNumber, int $maxNumItemsPerPage, array $options = []): array
     {
         try {
             $query = $this->getCachedBuilder()
                 ->model(new User())
-                ->whereEquals('objectClass', 'person');
+                ->whereEquals('objectClass', $this->objectClass);
 
             if ($filter = Options::getFilter($options)) {
                 self::addFilterToQuery($query, $filter->getRootNode());
             }
 
+            $sorting = Options::getSorting($options);
+            if ($sorting && $sortField = ($sorting->getSortFields()[0] ?? null)) {
+                dump('sorting by '.Sorting::getPath($sortField));
+                $allResults = $query->get();
+                $allResults = $allResults->sortBy(Sorting::getPath($sortField), \SORT_REGULAR,
+                    Sorting::getDirection($sortField) === Sorting::DIRECTION_DESCENDING);
+                $results = $allResults->forPage($currentPageNumber, $maxNumItemsPerPage);
+            } else {
+                $results = $query->forPage($currentPageNumber, $maxNumItemsPerPage);
+            }
+
             $users = [];
-            foreach ($query->forPage($currentPageNumber, $maxNumItemsPerPage) as $entry) {
+            foreach ($results as $entry) {
                 $users[] = new LdapEntry($entry);
             }
 
@@ -290,8 +292,6 @@ class LdapConnection implements LoggerAwareInterface, LdapConnectionInterface
 
     private function loadConfig(array $config)
     {
-        $this->identifierAttributeName =
-            $config[Configuration::LDAP_IDENTIFIER_ATTRIBUTE_ATTRIBUTE] ?? 'cn';
         $this->objectClass =
             $config[Configuration::LDAP_OBJECT_CLASS_ATTRIBUTE] ?? 'person';
 

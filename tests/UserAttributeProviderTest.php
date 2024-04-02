@@ -36,10 +36,7 @@ class UserAttributeProviderTest extends TestCase
         $this->addTestUser($testUsers, 'honey90', null);
 
         $ldapApi = new LdapConnectionProvider();
-        $ldapApi->addTestConnection(self::TEST_CONNECTION_IDENTIFIER, [
-            'encryption' => 'simple_tls',
-            'identifier_attribute' => self::LDAP_IDENTIFIER_ATTRIBUTE_NAME,
-        ], $testUsers);
+        $ldapApi->addTestConnection(self::TEST_CONNECTION_IDENTIFIER, [], $testUsers);
 
         $this->eventDispatcher = new EventDispatcher();
 
@@ -63,6 +60,7 @@ class UserAttributeProviderTest extends TestCase
         return [
             Configuration::USER_ATTRIBUTE_PROVIDER_ATTRIBUTE => [
                 Configuration::LDAP_CONNECTION_ATTRIBUTE => self::TEST_CONNECTION_IDENTIFIER,
+                Configuration::LDAP_USER_IDENTIFIER_ATTRIBUTE_ATTRIBUTE => self::LDAP_IDENTIFIER_ATTRIBUTE_NAME,
                 Configuration::ATTRIBUTES_ATTRIBUTE => [
                     [
                         Configuration::NAME_ATTRIBUTE => self::ROLES_ATTRIBUTE,

@@ -6,9 +6,13 @@ namespace Dbp\Relay\CoreConnectorLdapBundle\Ldap;
 
 use Dbp\Relay\CoreConnectorLdapBundle\DependencyInjection\Configuration;
 use Psr\Cache\CacheItemPoolInterface;
+use Psr\Log\LoggerAwareInterface;
+use Psr\Log\LoggerAwareTrait;
 
-class LdapConnectionProvider
+class LdapConnectionProvider implements LoggerAwareInterface
 {
+    use LoggerAwareTrait;
+
     private array $connectionConfigs = [];
 
     /** @var CacheItemPoolInterface[] */
@@ -43,6 +47,10 @@ class LdapConnectionProvider
             }
             $cachePool = $this->cachePools[$connectionIdentifier] ?? null;
             $connection = new LdapConnection($connectionConfig, $cachePool, $cachePool !== null ? $connectionConfig[Configuration::LDAP_CACHE_TTL_ATTRIBUTE] : 0);
+            // currently, using one logger for all connections (consider making the logger configurable per connection)
+            if ($this->logger !== null) {
+                $connection->setLogger($this->logger);
+            }
             $this->connections[$connectionIdentifier] = $connection;
         }
 
@@ -50,7 +58,7 @@ class LdapConnectionProvider
     }
 
     public function createConnection(string $host, string $base_dn, string $username, string $password,
-        string $encryption = 'start_tls', string $objectClass = 'person', string $identifierAttribute = 'cn'): LdapConnectionInterface
+        string $encryption = 'start_tls', string $objectClass = 'person'): LdapConnectionInterface
     {
         $connectionConfig = [
             Configuration::LDAP_HOST_ATTRIBUTE => $host,
@@ -59,15 +67,17 @@ class LdapConnectionProvider
             Configuration::LDAP_PASSWORD_ATTRIBUTE => $password,
             Configuration::LDAP_ENCRYPTION_ATTRIBUTE => $encryption,
             Configuration::LDAP_OBJECT_CLASS_ATTRIBUTE => $objectClass,
-            Configuration::LDAP_IDENTIFIER_ATTRIBUTE_ATTRIBUTE => $identifierAttribute,
         ];
 
         return new LdapConnection($connectionConfig);
     }
 
-    public function addTestConnection(string $connectionIdentifier, array $config = [], array $testUsers = [])
+    public function addTestConnection(string $connectionIdentifier, array $config = [], array $testUsers = []): LdapConnectionInterface
     {
-        $this->connections[$connectionIdentifier] = new TestLdapConnection($config, $testUsers);
+        $testLdapConnection = new TestLdapConnection($config, $testUsers);
+        $this->connections[$connectionIdentifier] = $testLdapConnection;
+
+        return $testLdapConnection;
     }
 
     public function getConnectionIdentifiers(): array

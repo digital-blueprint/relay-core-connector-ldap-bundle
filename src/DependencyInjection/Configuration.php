@@ -19,6 +19,7 @@ class Configuration implements ConfigurationInterface
     public const DEFAULT_VALUE_ATTRIBUTE = 'default_value';
     public const DEFAULT_VALUES_ATTRIBUTE = 'default_values';
     public const LDAP_CONNECTION_ATTRIBUTE = 'ldap_connection';
+    public const LDAP_USER_IDENTIFIER_ATTRIBUTE_ATTRIBUTE = 'ldap_user_identifier_attribute';
 
     public const CONNECTIONS_ATTRIBUTE = 'connections';
     public const LDAP_CONNECTION_IDENTIFIER_ATTRIBUTE = 'identifier';
@@ -27,7 +28,6 @@ class Configuration implements ConfigurationInterface
     public const LDAP_USERNAME_ATTRIBUTE = 'username';
     public const LDAP_PASSWORD_ATTRIBUTE = 'password';
     public const LDAP_ENCRYPTION_ATTRIBUTE = 'encryption';
-    public const LDAP_IDENTIFIER_ATTRIBUTE_ATTRIBUTE = 'identifier_attribute';
     public const LDAP_OBJECT_CLASS_ATTRIBUTE = 'object_class';
     public const LDAP_CACHE_TTL_ATTRIBUTE = 'cache_ttl';
 
@@ -82,6 +82,9 @@ class Configuration implements ConfigurationInterface
                    ->isRequired()
                    ->info('The identifier of the LDAP connection to use. See the dbp_relay_ldap config for available connections.')
                 ->end()
+                ->scalarNode(self::LDAP_USER_IDENTIFIER_ATTRIBUTE_ATTRIBUTE)
+                   ->defaultValue('cn')
+                ->end()
             ->end()
         ;
     }
@@ -112,9 +115,6 @@ class Configuration implements ConfigurationInterface
                             ->info('simple_tls uses port 636 and is sometimes referred to as "SSL", start_tls uses port 389 and is sometimes referred to as "TLS", plain means none')
                             ->values(['start_tls', 'simple_tls', 'plain'])
                             ->defaultValue('start_tls')
-                        ->end()
-                        ->scalarNode(self::LDAP_IDENTIFIER_ATTRIBUTE_ATTRIBUTE)
-                          ->defaultValue('cn')
                         ->end()
                         ->scalarNode(self::LDAP_OBJECT_CLASS_ATTRIBUTE)
                         ->defaultValue('person')

@@ -23,25 +23,21 @@ class UserAttributeProvider implements UserAttributeProviderInterface
     private const IS_ARRAY_KEY = 'array';
 
     private LdapConnectionProvider $ldapConnectionProvider;
-
-    private string $ldapConnectionIdentifier;
-
     private UserSessionInterface $userSession;
-
     private EventDispatcherInterface $eventDispatcher;
-
-    private ?CacheItemPoolInterface $userCache;
+    private ?CacheItemPoolInterface $userCache = null;
 
     /** @var array[] */
-    private array $availableAttributes;
+    private array $availableAttributes = [];
+
+    private ?string $ldapConnectionIdentifier = null;
+    private ?string $ldapUserIdentifierAttribute = null;
 
     public function __construct(LdapConnectionProvider $ldapConnectionProvider, UserSessionInterface $userSession, EventDispatcherInterface $eventDispatcher)
     {
         $this->ldapConnectionProvider = $ldapConnectionProvider;
         $this->userSession = $userSession;
         $this->eventDispatcher = $eventDispatcher;
-        $this->userCache = null;
-        $this->availableAttributes = [];
     }
 
     public function setConfig(array $config)
@@ -94,9 +90,11 @@ class UserAttributeProvider implements UserAttributeProviderInterface
     private function getUserDataFromLdap(string $userIdentifier): array
     {
         try {
-            $ldapEntry = $this->ldapConnectionProvider->getConnection($this->ldapConnectionIdentifier)->getEntryByIdentifier($userIdentifier);
+            $ldapEntry = $this->ldapConnectionProvider->getConnection($this->ldapConnectionIdentifier)
+                ->getEntryByAttribute($this->ldapUserIdentifierAttribute, $userIdentifier);
         } catch (LdapException $exception) {
-            throw ApiError::withDetails(Response::HTTP_BAD_GATEWAY, sprintf('failed to get user data from LDAP: \'%s\'', $exception->getMessage()));
+            throw ApiError::withDetails(Response::HTTP_BAD_GATEWAY,
+                sprintf('failed to get user data from LDAP: \'%s\'', $exception->getMessage()));
         }
 
         $event = new UserDataLoadedEvent($ldapEntry->getAttributeValues());
@@ -126,6 +124,7 @@ class UserAttributeProvider implements UserAttributeProviderInterface
     private function loadConfig(array $config)
     {
         $this->ldapConnectionIdentifier = $config[Configuration::LDAP_CONNECTION_ATTRIBUTE];
+        $this->ldapUserIdentifierAttribute = $config[Configuration::LDAP_USER_IDENTIFIER_ATTRIBUTE_ATTRIBUTE] ?? 'cn';
 
         $this->availableAttributes = [];
         foreach ($config[Configuration::ATTRIBUTES_ATTRIBUTE] as $attribute) {
