@@ -288,18 +288,18 @@ class LdapConnection implements LoggerAwareInterface, LdapConnectionInterface
                 ->whereEquals('objectClass', $this->objectClass)
                 ->whereEquals($attributeName, $attributeValue)
                 ->first();
-
-            if ($entry === null) {
-                throw new LdapException(sprintf("User with '%s' attribute value '%s' could not be found!",
-                    $attributeName, $attributeValue), LdapException::USER_NOT_FOUND);
-            }
-
-            return new LdapEntry($entry);
         } catch (\Exception $exception) {
             // There was an issue binding / connecting to the server.
             throw new LdapException(sprintf('LDAP server connection failed. Message: %s', $exception->getMessage()),
                 LdapException::SERVER_CONNECTION_FAILED);
         }
+
+        if ($entry === null) {
+            throw new LdapException(sprintf("User with '%s' attribute value '%s' could not be found!",
+                $attributeName, $attributeValue), LdapException::ENTRY_NOT_FOUND);
+        }
+
+        return new LdapEntry($entry);
     }
 
     private function loadConfig(array $config)

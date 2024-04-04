@@ -73,6 +73,6 @@ class TestLdapConnection extends LdapConnection
             }
         }
 
-        throw new LdapException(sprintf("User with '%s' attribute value '%s' could not be found!", $attributeName, $attributeValue), LdapException::USER_NOT_FOUND);
+        throw new LdapException(sprintf("User with '%s' attribute value '%s' could not be found!", $attributeName, $attributeValue), LdapException::ENTRY_NOT_FOUND);
     }
 }
