@@ -34,7 +34,10 @@ class LdapConnection implements LoggerAwareInterface, LdapConnectionInterface
     private string $objectClass;
     private ?Connection $connection = null;
 
-    private static function addFilterToQuery(Builder $queryBuilder, FilterNode $filterNode)
+    /**
+     * @throws LdapException
+     */
+    private static function addFilterToQuery(Builder $queryBuilder, FilterNode $filterNode): void
     {
         if ($filterNode instanceof LogicalFilterNode) {
             switch ($filterNode->getNodeType()) {
@@ -60,7 +63,7 @@ class LdapConnection implements LoggerAwareInterface, LdapConnectionInterface
                     });
                     break;
                 default:
-                    throw new \InvalidArgumentException('invalid filter node type: '.$filterNode->getNodeType());
+                    throw new LdapException('invalid filter node type: '.$filterNode->getNodeType(), LdapException::FILTER_INVALID);
             }
         } elseif ($filterNode instanceof ConditionFilterNode) {
             $field = $filterNode->getField();
@@ -85,8 +88,9 @@ class LdapConnection implements LoggerAwareInterface, LdapConnectionInterface
                     $queryBuilder->where($field, $queryBuilder->getGrammar()->getOperators()['<='], $value);
                     break;
                 case FilterOperatorType::IN_ARRAY_OPERATOR:
-                    if (!is_array($value)) {
-                        throw new \RuntimeException('filter condition operator "'.FilterOperatorType::IN_ARRAY_OPERATOR.'" requires an array type value');
+                    if (!is_array($value) || empty($value)) {
+                        throw new LdapException('filter condition operator "'.FilterOperatorType::IN_ARRAY_OPERATOR.'" requires non-empty array value',
+                            LdapException::FILTER_INVALID);
                     }
                     $queryBuilder->whereIn($field, $value);
                     break;
@@ -94,12 +98,13 @@ class LdapConnection implements LoggerAwareInterface, LdapConnectionInterface
                     $queryBuilder->whereHas($field);
                     break;
                 default:
-                    throw new \UnexpectedValueException('unsupported filter condition operator: '.$filterNode->getOperator());
+                    throw new LdapException('unsupported filter condition operator: '.$filterNode->getOperator(),
+                        LdapException::FILTER_INVALID);
             }
         }
     }
 
-    private static function addSortingToQuery(Builder $queryBuilder, Sorting $sorting)
+    private static function addSortingToQuery(Builder $queryBuilder, Sorting $sorting): void
     {
         foreach ($sorting->getSortFields() as $sortField) {
             $queryBuilder->orderBy(Sorting::getPath($sortField),
@@ -118,7 +123,7 @@ class LdapConnection implements LoggerAwareInterface, LdapConnectionInterface
     /**
      * @throws LdapException
      */
-    public function checkConnection()
+    public function checkConnection(): void
     {
         try {
             $this->getCachedBuilder()->first();
@@ -145,7 +150,7 @@ class LdapConnection implements LoggerAwareInterface, LdapConnectionInterface
         }
     }
 
-    public function setCache(CacheItemPoolInterface $cacheItemPool, int $ttl)
+    public function setCache(CacheItemPoolInterface $cacheItemPool, int $ttl): void
     {
         $this->cacheItemPool = $ttl > 0 ? $cacheItemPool : null;
         $this->cacheTtl = $ttl;
@@ -302,7 +307,7 @@ class LdapConnection implements LoggerAwareInterface, LdapConnectionInterface
         return new LdapEntry($entry);
     }
 
-    private function loadConfig(array $config)
+    private function loadConfig(array $config): void
     {
         $this->objectClass =
             $config[Configuration::LDAP_OBJECT_CLASS_ATTRIBUTE] ?? 'person';

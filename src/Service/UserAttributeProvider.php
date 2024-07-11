@@ -40,12 +40,12 @@ class UserAttributeProvider implements UserAttributeProviderInterface
         $this->eventDispatcher = $eventDispatcher;
     }
 
-    public function setConfig(array $config)
+    public function setConfig(array $config): void
     {
         $this->loadConfig($config);
     }
 
-    public function setCache(?CacheItemPoolInterface $cachePool)
+    public function setCache(?CacheItemPoolInterface $cachePool): void
     {
         $this->userCache = $cachePool;
     }
@@ -85,7 +85,7 @@ class UserAttributeProvider implements UserAttributeProviderInterface
     }
 
     /*
-     * @throws \RuntimeException
+     * @throws ApiError
      */
     private function getUserDataFromLdap(string $userIdentifier): array
     {
@@ -121,7 +121,7 @@ class UserAttributeProvider implements UserAttributeProviderInterface
     /*
      * @throws \RuntimeException
      */
-    private function loadConfig(array $config)
+    private function loadConfig(array $config): void
     {
         $this->ldapConnectionIdentifier = $config[Configuration::LDAP_CONNECTION_ATTRIBUTE];
         $this->ldapUserIdentifierAttribute = $config[Configuration::LDAP_USER_IDENTIFIER_ATTRIBUTE_ATTRIBUTE] ?? 'cn';
