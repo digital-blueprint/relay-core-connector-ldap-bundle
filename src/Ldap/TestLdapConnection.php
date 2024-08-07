@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Dbp\Relay\CoreConnectorLdapBundle\Ldap;
 
 use Dbp\Relay\CoreBundle\Rest\Options;
-use Dbp\Relay\CoreBundle\Rest\Query\Sorting\Sorting;
+use Dbp\Relay\CoreBundle\Rest\Query\Sort\Sort;
 use Illuminate\Support\Collection;
 
 /**
@@ -36,13 +36,12 @@ class TestLdapConnection extends LdapConnection
     protected function getEntriesInternal(int $currentPageNumber, int $maxNumItemsPerPage, array $options = []): array
     {
         // TODO: consider filters
-        $sorting = Options::getSorting($options);
-        if ($sorting && $sortField = ($sorting->getSortFields()[0] ?? null)) {
-            $testEntryCollection = new Collection($this->testEntries);
-            $allResults = $testEntryCollection->sortBy(Sorting::getPath($sortField), \SORT_REGULAR,
-                Sorting::getDirection($sortField) === Sorting::DIRECTION_DESCENDING)->toArray();
-        } else {
-            $allResults = $this->testEntries;
+        $allResults = new Collection($this->testEntries);
+        $sortFields = Options::getSort($options)?->getSortFields();
+        if (!empty($sortFields)) {
+            $allResults = $allResults->sortBy(array_map(function ($sortField) {
+                return [Sort::getPath($sortField), Sort::getDirection($sortField) === Sort::ASCENDING_DIRECTION ? 'asc' : 'desc'];
+            }, $sortFields));
         }
 
         $testUsers = [];

@@ -10,7 +10,7 @@ use Dbp\Relay\CoreBundle\Rest\Query\Filter\Nodes\LogicalNode as LogicalFilterNod
 use Dbp\Relay\CoreBundle\Rest\Query\Filter\Nodes\Node as FilterNode;
 use Dbp\Relay\CoreBundle\Rest\Query\Filter\Nodes\NodeType as FilterNodeType;
 use Dbp\Relay\CoreBundle\Rest\Query\Filter\Nodes\OperatorType as FilterOperatorType;
-use Dbp\Relay\CoreBundle\Rest\Query\Sorting\Sorting;
+use Dbp\Relay\CoreBundle\Rest\Query\Sort\Sort;
 use Dbp\Relay\CoreConnectorLdapBundle\DependencyInjection\Configuration;
 use LdapRecord\Auth\BindException;
 use LdapRecord\Configuration\ConfigurationException;
@@ -104,11 +104,11 @@ class LdapConnection implements LoggerAwareInterface, LdapConnectionInterface
         }
     }
 
-    private static function addSortingToQuery(Builder $queryBuilder, Sorting $sorting): void
+    private static function addSortToQuery(Builder $queryBuilder, Sort $sort): void
     {
-        foreach ($sorting->getSortFields() as $sortField) {
-            $queryBuilder->orderBy(Sorting::getPath($sortField),
-                Sorting::getDirection($sortField) === Sorting::DIRECTION_ASCENDING ? 'asc' : 'desc');
+        foreach ($sort->getSortFields() as $sortField) {
+            $queryBuilder->orderBy(Sort::getPath($sortField),
+                Sort::getDirection($sortField) === Sort::ASCENDING_DIRECTION ? 'asc' : 'desc');
         }
     }
 
@@ -199,13 +199,15 @@ class LdapConnection implements LoggerAwareInterface, LdapConnectionInterface
                 self::addFilterToQuery($query, $filter->getRootNode());
             }
 
-            $sorting = Options::getSorting($options);
-            if ($sorting && $sortField = ($sorting->getSortFields()[0] ?? null)) {
+            $sortFields = Options::getSort($options)?->getSortFields();
+            if (!empty($sortFields)) {
                 // WORKAROUND: we do the sorting manually here, since we currently don't know if the LDAP server supports sorting.
                 // TODO: find a way to find out whether the LDAP server supports sorting
                 $allResults = $query->get();
-                $allResults = $allResults->sortBy(Sorting::getPath($sortField), \SORT_REGULAR,
-                    Sorting::getDirection($sortField) === Sorting::DIRECTION_DESCENDING);
+                $allResults = $allResults->sortBy(array_map(
+                    function ($sortField) {
+                        return [Sort::getPath($sortField), Sort::getDirection($sortField) === Sort::ASCENDING_DIRECTION ? 'asc' : 'desc'];
+                    }, $sortFields));
                 $results = $allResults->forPage($currentPageNumber, $maxNumItemsPerPage);
             } else {
                 $results = $query->forPage($currentPageNumber, $maxNumItemsPerPage);

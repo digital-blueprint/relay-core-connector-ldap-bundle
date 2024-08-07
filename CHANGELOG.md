@@ -1,3 +1,9 @@
+# Unreleased
+
+# v0.2.3
+
+* Add support for sort by multiple attributes
+
 # v0.2.2
 
 * Add support for api-platform 3.2
