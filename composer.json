@@ -27,12 +27,6 @@
         "symfony/phpunit-bridge": "^5.4 || ^6.4",
         "vimeo/psalm": "^5.22.2"
     },
-    "repositories": [
-        {
-            "type": "vcs",
-            "url": "https://gitlab.tugraz.at/dbp/relay/dbp-relay-ldap-bundle.git"
-        }
-    ],
     "autoload": {
         "psr-4": {
             "Dbp\\Relay\\CoreConnectorLdapBundle\\": "src/"
