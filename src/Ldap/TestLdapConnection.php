@@ -45,7 +45,7 @@ class TestLdapConnection extends LdapConnection
         }
 
         $testUsers = [];
-        foreach (array_slice($allResults, ($currentPageNumber - 1) * $maxNumItemsPerPage, $maxNumItemsPerPage) as $testUser) {
+        foreach ($allResults->forPage($currentPageNumber, $maxNumItemsPerPage) as $testUser) {
             $testUsers[] = new TestLdapEntry($testUser);
         }
 
