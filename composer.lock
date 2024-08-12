@@ -364,16 +364,16 @@
         },
         {
             "name": "directorytree/ldaprecord",
-            "version": "v3.6.4",
+            "version": "v3.7.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/DirectoryTree/LdapRecord.git",
-                "reference": "81768726262e3000675598821353c801e71df71d"
+                "reference": "4113aa08f72bbc76630fad3b05d57cd431fb0839"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/DirectoryTree/LdapRecord/zipball/81768726262e3000675598821353c801e71df71d",
-                "reference": "81768726262e3000675598821353c801e71df71d",
+                "url": "https://api.github.com/repos/DirectoryTree/LdapRecord/zipball/4113aa08f72bbc76630fad3b05d57cd431fb0839",
+                "reference": "4113aa08f72bbc76630fad3b05d57cd431fb0839",
                 "shasum": ""
             },
             "require": {
@@ -436,7 +436,7 @@
                     "type": "github"
                 }
             ],
-            "time": "2024-05-13T15:57:23+00:00"
+            "time": "2024-07-26T21:20:12+00:00"
         },
         {
             "name": "doctrine/inflector",
