@@ -1,5 +1,10 @@
 # Unreleased
 
+# v0.2.4
+
+* Add various missing dependencies
+* Port to PHPUnit 10
+
 # v0.2.3
 
 * Add support for sort by multiple attributes
