@@ -1,5 +1,9 @@
 # Unreleased
 
+# v0.2.5
+
+* Require higher version of illuminate/collections
+
 # v0.2.4
 
 * Add various missing dependencies

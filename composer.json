@@ -9,7 +9,7 @@
         "api-platform/core": "^2.7.11 || ^3.2",
         "dbp/relay-core-bundle": "^0.1.177",
         "directorytree/ldaprecord": "^3.5",
-        "illuminate/collections": "^10.0",
+        "illuminate/collections": "^10.48",
         "psr/cache": "^2.0 || ^3.0",
         "psr/log": "^2.0 || ^3.0",
         "symfony/cache": "^5.4 || ^6.4",
