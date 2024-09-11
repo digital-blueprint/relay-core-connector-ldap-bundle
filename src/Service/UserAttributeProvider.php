@@ -15,7 +15,6 @@ use Dbp\Relay\CoreConnectorLdapBundle\Ldap\LdapException;
 use Psr\Cache\CacheItemPoolInterface;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\HttpKernel\KernelInterface;
 
 class UserAttributeProvider implements UserAttributeProviderInterface
 {
