@@ -15,6 +15,7 @@ use Dbp\Relay\CoreConnectorLdapBundle\Ldap\LdapException;
 use Psr\Cache\CacheItemPoolInterface;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpKernel\KernelInterface;
 
 class UserAttributeProvider implements UserAttributeProviderInterface
 {
@@ -33,7 +34,8 @@ class UserAttributeProvider implements UserAttributeProviderInterface
     private ?string $ldapConnectionIdentifier = null;
     private ?string $ldapUserIdentifierAttribute = null;
 
-    public function __construct(LdapConnectionProvider $ldapConnectionProvider, UserSessionInterface $userSession, EventDispatcherInterface $eventDispatcher)
+    public function __construct(LdapConnectionProvider $ldapConnectionProvider, UserSessionInterface $userSession,
+        EventDispatcherInterface $eventDispatcher)
     {
         $this->ldapConnectionProvider = $ldapConnectionProvider;
         $this->userSession = $userSession;
@@ -60,28 +62,29 @@ class UserAttributeProvider implements UserAttributeProviderInterface
      */
     public function getUserAttributes(?string $userIdentifier): array
     {
-        if (Tools::isNullOrEmpty($userIdentifier) === false) {
-            // in case there is no session, e.g. for debug purposes
-            if ($this->userSession->getUserIdentifier() === null || $this->userCache === null) {
-                return $this->getUserDataFromLdap($userIdentifier);
-            }
+        $userAttributes = null;
 
-            $userCacheItem = $this->userCache->getItem($this->userSession->getSessionCacheKey().'-'.$userIdentifier);
-            if ($userCacheItem->isHit()) {
+        if (!$this->userSession->isAuthenticated()) {
+            if (!Tools::isNullOrEmpty($userIdentifier)) {
+                // in case there is no session, e.g. for debug purposes
+                $userAttributes = $this->getUserDataFromLdap($userIdentifier);
+            }
+        } elseif (!Tools::isNullOrEmpty($userIdentifier) && !$this->userSession->isServiceAccount()) { // real users only
+            $userCacheItem = $this->userCache?->getItem($this->userSession->getSessionCacheKey().'-'.$userIdentifier);
+            if ($userCacheItem?->isHit()) {
                 $userAttributes = $userCacheItem->get();
             } else {
                 $userAttributes = $this->getUserDataFromLdap($userIdentifier);
-                $userCacheItem->set($userAttributes);
-                $userCacheItem->expiresAfter($this->userSession->getSessionTTL() + 1);
-                $this->userCache->save($userCacheItem);
+                $userCacheItem?->set($userAttributes);
+                $userCacheItem?->expiresAfter($this->userSession->getSessionTTL() + 1);
+                $this->userCache?->save($userCacheItem);
             }
-        } else {
-            $userAttributes = array_map(function ($attributeData) {
-                return $attributeData[self::DEFAULT_VALUE_KEY];
-            }, $this->availableAttributes);
         }
 
-        return $userAttributes;
+        return $userAttributes ?? array_map(
+            function ($attributeData) {
+                return $attributeData[self::DEFAULT_VALUE_KEY];
+            }, $this->availableAttributes);
     }
 
     /*
