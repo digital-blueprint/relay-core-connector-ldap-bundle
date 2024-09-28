@@ -270,16 +270,16 @@
         },
         {
             "name": "dbp/relay-core-bundle",
-            "version": "v0.1.181",
+            "version": "v0.1.182",
             "source": {
                 "type": "git",
                 "url": "https://github.com/digital-blueprint/relay-core-bundle.git",
-                "reference": "28f148c034b89384f9ba2a1af204131085b86cf5"
+                "reference": "0809b2ca9293b2562c1719b11edf4960a172ac09"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/digital-blueprint/relay-core-bundle/zipball/28f148c034b89384f9ba2a1af204131085b86cf5",
-                "reference": "28f148c034b89384f9ba2a1af204131085b86cf5",
+                "url": "https://api.github.com/repos/digital-blueprint/relay-core-bundle/zipball/0809b2ca9293b2562c1719b11edf4960a172ac09",
+                "reference": "0809b2ca9293b2562c1719b11edf4960a172ac09",
                 "shasum": ""
             },
             "require": {
@@ -365,22 +365,22 @@
             "description": "The core bundle of the Relay API gateway",
             "support": {
                 "issues": "https://github.com/digital-blueprint/relay-core-bundle/issues",
-                "source": "https://github.com/digital-blueprint/relay-core-bundle/tree/v0.1.181"
+                "source": "https://github.com/digital-blueprint/relay-core-bundle/tree/v0.1.182"
             },
-            "time": "2024-09-05T14:40:47+00:00"
+            "time": "2024-09-26T10:16:12+00:00"
         },
         {
             "name": "directorytree/ldaprecord",
-            "version": "v3.7.0",
+            "version": "v3.7.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/DirectoryTree/LdapRecord.git",
-                "reference": "4113aa08f72bbc76630fad3b05d57cd431fb0839"
+                "reference": "9b5f53d820a490fdb0c7a098c93f3b83b74455dd"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/DirectoryTree/LdapRecord/zipball/4113aa08f72bbc76630fad3b05d57cd431fb0839",
-                "reference": "4113aa08f72bbc76630fad3b05d57cd431fb0839",
+                "url": "https://api.github.com/repos/DirectoryTree/LdapRecord/zipball/9b5f53d820a490fdb0c7a098c93f3b83b74455dd",
+                "reference": "9b5f53d820a490fdb0c7a098c93f3b83b74455dd",
                 "shasum": ""
             },
             "require": {
@@ -443,7 +443,7 @@
                     "type": "github"
                 }
             ],
-            "time": "2024-07-26T21:20:12+00:00"
+            "time": "2024-09-23T03:45:43+00:00"
         },
         {
             "name": "doctrine/inflector",
