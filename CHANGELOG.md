@@ -1,5 +1,9 @@
 # Unreleased
 
+# v0.2.7
+
+* Update core
+
 # v0.2.6
 
 * Adapt to user identifier now being none-null even for system account users
