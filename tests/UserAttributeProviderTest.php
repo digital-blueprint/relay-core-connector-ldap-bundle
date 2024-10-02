@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Dbp\Relay\CoreConnectorLdapBundle\Tests;
 
+use Dbp\Relay\CoreBundle\Exception\ApiError;
 use Dbp\Relay\CoreBundle\TestUtils\TestUserSession;
 use Dbp\Relay\CoreConnectorLdapBundle\DependencyInjection\Configuration;
 use Dbp\Relay\CoreConnectorLdapBundle\Ldap\LdapConnectionProvider;
@@ -167,7 +168,7 @@ class UserAttributeProviderTest extends TestCase
 
     public function testUserNotFoundException()
     {
-        $this->expectException(\RuntimeException::class);
+        $this->expectException(ApiError::class);
         $this->userAttributeProvider->getUserAttributes('not_found');
     }
 
