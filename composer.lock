@@ -229,26 +229,26 @@
         },
         {
             "name": "carbonphp/carbon-doctrine-types",
-            "version": "2.1.0",
+            "version": "3.2.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/CarbonPHP/carbon-doctrine-types.git",
-                "reference": "99f76ffa36cce3b70a4a6abce41dba15ca2e84cb"
+                "reference": "18ba5ddfec8976260ead6e866180bd5d2f71aa1d"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/CarbonPHP/carbon-doctrine-types/zipball/99f76ffa36cce3b70a4a6abce41dba15ca2e84cb",
-                "reference": "99f76ffa36cce3b70a4a6abce41dba15ca2e84cb",
+                "url": "https://api.github.com/repos/CarbonPHP/carbon-doctrine-types/zipball/18ba5ddfec8976260ead6e866180bd5d2f71aa1d",
+                "reference": "18ba5ddfec8976260ead6e866180bd5d2f71aa1d",
                 "shasum": ""
             },
             "require": {
-                "php": "^7.4 || ^8.0"
+                "php": "^8.1"
             },
             "conflict": {
-                "doctrine/dbal": "<3.7.0 || >=4.0.0"
+                "doctrine/dbal": "<4.0.0 || >=5.0.0"
             },
             "require-dev": {
-                "doctrine/dbal": "^3.7.0",
+                "doctrine/dbal": "^4.0.0",
                 "nesbot/carbon": "^2.71.0 || ^3.0.0",
                 "phpunit/phpunit": "^10.3"
             },
@@ -278,7 +278,7 @@
             ],
             "support": {
                 "issues": "https://github.com/CarbonPHP/carbon-doctrine-types/issues",
-                "source": "https://github.com/CarbonPHP/carbon-doctrine-types/tree/2.1.0"
+                "source": "https://github.com/CarbonPHP/carbon-doctrine-types/tree/3.2.0"
             },
             "funding": [
                 {
@@ -294,20 +294,20 @@
                     "type": "tidelift"
                 }
             ],
-            "time": "2023-12-11T17:09:12+00:00"
+            "time": "2024-02-09T16:56:22+00:00"
         },
         {
             "name": "dbp/relay-core-bundle",
-            "version": "v0.1.186",
+            "version": "v0.1.189",
             "source": {
                 "type": "git",
                 "url": "https://github.com/digital-blueprint/relay-core-bundle.git",
-                "reference": "b92f0b35fa1899fe59ab85ba32a99bbaa6b07277"
+                "reference": "70842174be78bc18635741cb4616012f25cd48d2"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/digital-blueprint/relay-core-bundle/zipball/b92f0b35fa1899fe59ab85ba32a99bbaa6b07277",
-                "reference": "b92f0b35fa1899fe59ab85ba32a99bbaa6b07277",
+                "url": "https://api.github.com/repos/digital-blueprint/relay-core-bundle/zipball/70842174be78bc18635741cb4616012f25cd48d2",
+                "reference": "70842174be78bc18635741cb4616012f25cd48d2",
                 "shasum": ""
             },
             "require": {
@@ -357,10 +357,8 @@
             },
             "conflict": {
                 "api-platform/core": "2.7.17",
-                "carbonphp/carbon-doctrine-types": ">=3",
                 "dbp/relay-auth-bundle": "*",
                 "dbp/relay-core-connector-oidc-bundle": "<=0.1.33",
-                "doctrine/dbal": ">=4",
                 "symfony/amqp-messenger": ">=6.0 <6.4",
                 "symfony/property-info": ">=6.0 <6.4",
                 "symfony/twig-bridge": ">=6.0 <6.4",
@@ -395,22 +393,22 @@
             "description": "The core bundle of the Relay API gateway",
             "support": {
                 "issues": "https://github.com/digital-blueprint/relay-core-bundle/issues",
-                "source": "https://github.com/digital-blueprint/relay-core-bundle/tree/v0.1.186"
+                "source": "https://github.com/digital-blueprint/relay-core-bundle/tree/v0.1.189"
             },
-            "time": "2024-10-10T14:39:46+00:00"
+            "time": "2024-10-17T13:12:35+00:00"
         },
         {
             "name": "directorytree/ldaprecord",
-            "version": "v3.7.1",
+            "version": "v3.7.2",
             "source": {
                 "type": "git",
                 "url": "https://github.com/DirectoryTree/LdapRecord.git",
-                "reference": "9b5f53d820a490fdb0c7a098c93f3b83b74455dd"
+                "reference": "93ef5cf4a09990006881e989d44d466a2d29fe4a"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/DirectoryTree/LdapRecord/zipball/9b5f53d820a490fdb0c7a098c93f3b83b74455dd",
-                "reference": "9b5f53d820a490fdb0c7a098c93f3b83b74455dd",
+                "url": "https://api.github.com/repos/DirectoryTree/LdapRecord/zipball/93ef5cf4a09990006881e989d44d466a2d29fe4a",
+                "reference": "93ef5cf4a09990006881e989d44d466a2d29fe4a",
                 "shasum": ""
             },
             "require": {
@@ -473,7 +471,7 @@
                     "type": "github"
                 }
             ],
-            "time": "2024-09-23T03:45:43+00:00"
+            "time": "2024-10-18T13:28:29+00:00"
         },
         {
             "name": "doctrine/inflector",
@@ -759,16 +757,16 @@
         },
         {
             "name": "guzzlehttp/promises",
-            "version": "2.0.3",
+            "version": "2.0.4",
             "source": {
                 "type": "git",
                 "url": "https://github.com/guzzle/promises.git",
-                "reference": "6ea8dd08867a2a42619d65c3deb2c0fcbf81c8f8"
+                "reference": "f9c436286ab2892c7db7be8c8da4ef61ccf7b455"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/guzzle/promises/zipball/6ea8dd08867a2a42619d65c3deb2c0fcbf81c8f8",
-                "reference": "6ea8dd08867a2a42619d65c3deb2c0fcbf81c8f8",
+                "url": "https://api.github.com/repos/guzzle/promises/zipball/f9c436286ab2892c7db7be8c8da4ef61ccf7b455",
+                "reference": "f9c436286ab2892c7db7be8c8da4ef61ccf7b455",
                 "shasum": ""
             },
             "require": {
@@ -822,7 +820,7 @@
             ],
             "support": {
                 "issues": "https://github.com/guzzle/promises/issues",
-                "source": "https://github.com/guzzle/promises/tree/2.0.3"
+                "source": "https://github.com/guzzle/promises/tree/2.0.4"
             },
             "funding": [
                 {
@@ -838,7 +836,7 @@
                     "type": "tidelift"
                 }
             ],
-            "time": "2024-07-18T10:29:17+00:00"
+            "time": "2024-10-17T10:06:22+00:00"
         },
         {
             "name": "guzzlehttp/psr7",
