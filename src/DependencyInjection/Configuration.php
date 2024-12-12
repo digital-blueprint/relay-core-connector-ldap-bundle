@@ -93,7 +93,6 @@ class Configuration implements ConfigurationInterface
     {
         $treeBuilder = new TreeBuilder(self::CONNECTIONS_ATTRIBUTE);
 
-        /** @phpstan-ignore-next-line */
         return $treeBuilder->getRootNode()
                 ->arrayPrototype()
                     ->children()
