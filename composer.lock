@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "c8e292ab0ff209b42b3eaa6a7518b122",
+    "content-hash": "834cd923a27ae3e1b8e3d647fb01e45a",
     "packages": [
         {
             "name": "api-platform/core",
@@ -298,16 +298,16 @@
         },
         {
             "name": "dbp/relay-core-bundle",
-            "version": "v0.1.197",
+            "version": "v0.1.198",
             "source": {
                 "type": "git",
                 "url": "https://github.com/digital-blueprint/relay-core-bundle.git",
-                "reference": "aa9a0155ded806af46e6b312b8fd845d5567c5d1"
+                "reference": "153e58d9d2967eb5db51ce4011e6350f688c5d23"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/digital-blueprint/relay-core-bundle/zipball/aa9a0155ded806af46e6b312b8fd845d5567c5d1",
-                "reference": "aa9a0155ded806af46e6b312b8fd845d5567c5d1",
+                "url": "https://api.github.com/repos/digital-blueprint/relay-core-bundle/zipball/153e58d9d2967eb5db51ce4011e6350f688c5d23",
+                "reference": "153e58d9d2967eb5db51ce4011e6350f688c5d23",
                 "shasum": ""
             },
             "require": {
@@ -393,9 +393,9 @@
             "description": "The core bundle of the Relay API gateway",
             "support": {
                 "issues": "https://github.com/digital-blueprint/relay-core-bundle/issues",
-                "source": "https://github.com/digital-blueprint/relay-core-bundle/tree/v0.1.197"
+                "source": "https://github.com/digital-blueprint/relay-core-bundle/tree/v0.1.198"
             },
-            "time": "2025-01-02T14:55:42+00:00"
+            "time": "2025-01-08T12:24:47+00:00"
         },
         {
             "name": "directorytree/ldaprecord",
@@ -11461,14 +11461,14 @@
     ],
     "aliases": [],
     "minimum-stability": "stable",
-    "stability-flags": {},
+    "stability-flags": [],
     "prefer-stable": false,
     "prefer-lowest": false,
     "platform": {
         "php": ">=8.1",
         "ext-json": "*"
     },
-    "platform-dev": {},
+    "platform-dev": [],
     "platform-overrides": {
         "php": "8.1"
     },

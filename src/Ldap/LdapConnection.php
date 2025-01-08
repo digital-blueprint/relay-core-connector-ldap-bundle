@@ -19,6 +19,7 @@ use LdapRecord\Container;
 use LdapRecord\LdapRecordException;
 use LdapRecord\Models\OpenLDAP\User;
 use LdapRecord\Query\Builder;
+use LdapRecord\Testing\ConnectionFake;
 use Psr\Cache\CacheItemPoolInterface;
 use Psr\Log\LoggerAwareInterface;
 use Psr\Log\LoggerAwareTrait;
@@ -31,8 +32,26 @@ class LdapConnection implements LoggerAwareInterface, LdapConnectionInterface
     private ?CacheItemPoolInterface $cacheItemPool;
     private int $cacheTtl;
     private array $connectionConfig = [];
-    private string $objectClass;
-    private ?Connection $connection = null;
+    private ?string $objectClass = null;
+    protected ?Connection $connection = null;
+
+    public static function toLdapRecordConnectionConfig(array $config): array
+    {
+        $connectionConfig = [
+            'hosts' => [$config[Configuration::LDAP_HOST_ATTRIBUTE] ?? ''],
+            'base_dn' => $config[Configuration::LDAP_BASE_DN_ATTRIBUTE] ?? '',
+            'username' => $config[Configuration::LDAP_USERNAME_ATTRIBUTE] ?? '',
+            'password' => $config[Configuration::LDAP_PASSWORD_ATTRIBUTE] ?? '',
+        ];
+
+        $encryption = $config[Configuration::LDAP_ENCRYPTION_ATTRIBUTE] ?? 'start_tls';
+        assert(in_array($encryption, ['start_tls', 'simple_tls', 'plain'], true));
+        $connectionConfig['use_tls'] = ($encryption === 'start_tls');
+        $connectionConfig['use_ssl'] = ($encryption === 'simple_tls');
+        $connectionConfig['port'] = ($encryption === 'start_tls' || $encryption === 'plain') ? 389 : 636;
+
+        return $connectionConfig;
+    }
 
     /**
      * @throws LdapException
@@ -167,7 +186,7 @@ class LdapConnection implements LoggerAwareInterface, LdapConnectionInterface
     /**
      * @throws LdapException
      */
-    public function getEntries(int $currentPageNumber, int $maxNumItemsPerPage, array $options = []): array
+    public function getEntries(int $currentPageNumber = 1, int $maxNumItemsPerPage = 30, array $options = []): array
     {
         return $this->getEntriesInternal($currentPageNumber, $maxNumItemsPerPage, $options);
     }
@@ -219,7 +238,7 @@ class LdapConnection implements LoggerAwareInterface, LdapConnectionInterface
             }
 
             return $entries;
-        } catch (\Exception $exception) {
+        } catch (LdapRecordException $exception) {
             // There was an issue binding / connecting to the server.
             throw new LdapException(sprintf('LDAP query failed. Message: %s', $exception->getMessage()),
                 LdapException::SERVER_CONNECTION_FAILED);
@@ -236,7 +255,7 @@ class LdapConnection implements LoggerAwareInterface, LdapConnectionInterface
                 ->whereEquals('objectClass', $this->objectClass)
                 ->whereHas($attribute)
                 ->first();
-        } catch (\Exception $exception) {
+        } catch (LdapRecordException $exception) {
             // There was an issue binding / connecting to the server.
             throw new LdapException(sprintf('LDAP server connection failed. Message: %s', $exception->getMessage()),
                 LdapException::SERVER_CONNECTION_FAILED);
@@ -260,9 +279,11 @@ class LdapConnection implements LoggerAwareInterface, LdapConnectionInterface
             if ($this->cacheItemPool !== null) {
                 $connection->setCache(new Psr16Cache($this->cacheItemPool));
             }
-            $connection->connect();
-
             $this->connection = $connection;
+        }
+
+        if (!$this->connection->isConnected()) {
+            $this->connection->connect();
         }
 
         return $this->connection;
@@ -295,7 +316,7 @@ class LdapConnection implements LoggerAwareInterface, LdapConnectionInterface
                 ->whereEquals('objectClass', $this->objectClass)
                 ->whereEquals($attributeName, $attributeValue)
                 ->first();
-        } catch (\Exception $exception) {
+        } catch (LdapRecordException $exception) {
             // There was an issue binding / connecting to the server.
             throw new LdapException(sprintf('LDAP server connection failed. Message: %s', $exception->getMessage()),
                 LdapException::SERVER_CONNECTION_FAILED);
@@ -314,17 +335,19 @@ class LdapConnection implements LoggerAwareInterface, LdapConnectionInterface
         $this->objectClass =
             $config[Configuration::LDAP_OBJECT_CLASS_ATTRIBUTE] ?? 'person';
 
-        $this->connectionConfig = [
-            'hosts' => [$config[Configuration::LDAP_HOST_ATTRIBUTE] ?? ''],
-            'base_dn' => $config[Configuration::LDAP_BASE_DN_ATTRIBUTE] ?? '',
-            'username' => $config[Configuration::LDAP_USERNAME_ATTRIBUTE] ?? '',
-            'password' => $config[Configuration::LDAP_PASSWORD_ATTRIBUTE] ?? '',
-        ];
+        $this->connectionConfig = self::toLdapRecordConnectionConfig($config);
+    }
 
-        $encryption = $config[Configuration::LDAP_ENCRYPTION_ATTRIBUTE] ?? 'start_tls';
-        assert(in_array($encryption, ['start_tls', 'simple_tls', 'plain'], true));
-        $this->connectionConfig['use_tls'] = ($encryption === 'start_tls');
-        $this->connectionConfig['use_ssl'] = ($encryption === 'simple_tls');
-        $this->connectionConfig['port'] = ($encryption === 'start_tls' || $encryption === 'plain') ? 389 : 636;
+    public function setFakeConnection(ConnectionFake $connectionFake): void
+    {
+        $this->connection = $connectionFake;
+    }
+
+    /**
+     * For testing purposes only.
+     */
+    public function getConnection(): Connection
+    {
+        return $this->connection;
     }
 }

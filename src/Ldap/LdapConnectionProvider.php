@@ -5,6 +5,9 @@ declare(strict_types=1);
 namespace Dbp\Relay\CoreConnectorLdapBundle\Ldap;
 
 use Dbp\Relay\CoreConnectorLdapBundle\DependencyInjection\Configuration;
+use LdapRecord\Connection;
+use LdapRecord\Container;
+use LdapRecord\Testing\DirectoryFake;
 use Psr\Cache\CacheItemPoolInterface;
 use Psr\Log\LoggerAwareInterface;
 use Psr\Log\LoggerAwareTrait;
@@ -21,7 +24,7 @@ class LdapConnectionProvider implements LoggerAwareInterface
     /** @var LdapConnectionInterface[] */
     private array $connections = [];
 
-    public function setConfig(array $config)
+    public function setConfig(array $config): void
     {
         $this->connectionConfigs = [];
         foreach ($config[Configuration::CONNECTIONS_ATTRIBUTE] as $connection) {
@@ -57,7 +60,7 @@ class LdapConnectionProvider implements LoggerAwareInterface
         return $connection;
     }
 
-    public function createConnection(string $host, string $base_dn, string $username, string $password,
+    public static function createConnection(string $host, string $base_dn, string $username, string $password,
         string $encryption = 'start_tls', string $objectClass = 'person'): LdapConnectionInterface
     {
         $connectionConfig = [
@@ -72,12 +75,23 @@ class LdapConnectionProvider implements LoggerAwareInterface
         return new LdapConnection($connectionConfig);
     }
 
-    public function addTestConnection(string $connectionIdentifier, array $config = [], array $testUsers = []): TestLdapConnection
+    public function makeFakeConnection(string $connectionIdentifier): void
     {
-        $testLdapConnection = new TestLdapConnection($config, $testUsers);
-        $this->connections[$connectionIdentifier] = $testLdapConnection;
+        try {
+            $connection = $this->getConnection($connectionIdentifier);
+            assert($connection instanceof LdapConnection);
 
-        return $testLdapConnection;
+            Container::getInstance()->addConnection(
+                new Connection(LdapConnection::toLdapRecordConnectionConfig(
+                    $this->connectionConfigs[$connectionIdentifier])), $connectionIdentifier);
+
+            $connectionFake = DirectoryFake::setup($connectionIdentifier);
+            $connectionFake->actingAs('cn=admin,dc=local,dc=com');
+            $connectionFake->shouldNotBeConnected();
+            $connection->setFakeConnection($connectionFake);
+        } catch (\Exception $exception) {
+            throw new \RuntimeException('make connection fake failed: '.$exception->getMessage());
+        }
     }
 
     public function getConnectionIdentifiers(): array

@@ -10,11 +10,9 @@ use Dbp\Relay\CoreBundle\HealthCheck\CheckResult;
 
 class HealthCheck implements CheckInterface
 {
-    private LdapConnectionProvider $ldapConnectionProvider;
-
-    public function __construct(LdapConnectionProvider $ldapConnectionProvider)
+    public function __construct(
+        private readonly LdapConnectionProvider $ldapConnectionProvider)
     {
-        $this->ldapConnectionProvider = $ldapConnectionProvider;
     }
 
     public function getName(): string

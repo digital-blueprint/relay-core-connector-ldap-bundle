@@ -6,13 +6,14 @@ namespace Dbp\Relay\CoreConnectorLdapBundle\Ldap;
 
 use LdapRecord\Models\Model;
 
+/**
+ * Wrapper for a result entry returned by LdapRecord.
+ */
 class LdapEntry implements LdapEntryInterface
 {
-    private Model $entry;
-
-    public function __construct(Model $entry)
+    public function __construct(
+        private readonly Model $entry)
     {
-        $this->entry = $entry;
     }
 
     public function getAttributeValue(string $attributeName, mixed $defaultValue = null): mixed

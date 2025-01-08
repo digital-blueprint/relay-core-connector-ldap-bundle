@@ -9,11 +9,9 @@ use Dbp\Relay\CoreBundle\Exception\ApiError;
 use Dbp\Relay\CoreBundle\Helpers\Tools;
 use Dbp\Relay\CoreBundle\User\UserAttributeProviderInterface;
 use Dbp\Relay\CoreConnectorLdapBundle\DependencyInjection\Configuration;
-use Dbp\Relay\CoreConnectorLdapBundle\Event\UserDataLoadedEvent;
 use Dbp\Relay\CoreConnectorLdapBundle\Ldap\LdapConnectionProvider;
 use Dbp\Relay\CoreConnectorLdapBundle\Ldap\LdapException;
 use Psr\Cache\CacheItemPoolInterface;
-use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\HttpFoundation\Response;
 
 class UserAttributeProvider implements UserAttributeProviderInterface
@@ -22,9 +20,6 @@ class UserAttributeProvider implements UserAttributeProviderInterface
     private const LDAP_ATTRIBUTE_KEY = 'ldap';
     private const IS_ARRAY_KEY = 'array';
 
-    private LdapConnectionProvider $ldapConnectionProvider;
-    private UserSessionInterface $userSession;
-    private EventDispatcherInterface $eventDispatcher;
     private ?CacheItemPoolInterface $userCache = null;
 
     /** @var array[] */
@@ -33,12 +28,10 @@ class UserAttributeProvider implements UserAttributeProviderInterface
     private ?string $ldapConnectionIdentifier = null;
     private ?string $ldapUserIdentifierAttribute = null;
 
-    public function __construct(LdapConnectionProvider $ldapConnectionProvider, UserSessionInterface $userSession,
-        EventDispatcherInterface $eventDispatcher)
+    public function __construct(
+        private readonly LdapConnectionProvider $ldapConnectionProvider,
+        private readonly UserSessionInterface $userSession)
     {
-        $this->ldapConnectionProvider = $ldapConnectionProvider;
-        $this->userSession = $userSession;
-        $this->eventDispatcher = $eventDispatcher;
     }
 
     public function setConfig(array $config): void
@@ -56,27 +49,28 @@ class UserAttributeProvider implements UserAttributeProviderInterface
         return array_keys($this->availableAttributes);
     }
 
-    /*
-     * @throws \RuntimeException
-     */
     public function getUserAttributes(?string $userIdentifier): array
     {
         $userAttributes = null;
 
-        if (!$this->userSession->isAuthenticated()) {
-            if (!Tools::isNullOrEmpty($userIdentifier)) {
+        if (Tools::isNullOrEmpty($userIdentifier) === false) {
+            if (!$this->userSession->isAuthenticated()) {
                 // in case there is no session, e.g. for debug purposes
                 $userAttributes = $this->getUserDataFromLdap($userIdentifier);
-            }
-        } elseif (!Tools::isNullOrEmpty($userIdentifier) && !$this->userSession->isServiceAccount()) { // real users only
-            $userCacheItem = $this->userCache?->getItem($this->userSession->getSessionCacheKey().'-'.$userIdentifier);
-            if ($userCacheItem?->isHit()) {
-                $userAttributes = $userCacheItem->get();
-            } else {
-                $userAttributes = $this->getUserDataFromLdap($userIdentifier);
-                $userCacheItem?->set($userAttributes);
-                $userCacheItem?->expiresAfter($this->userSession->getSessionTTL() + 1);
-                $this->userCache?->save($userCacheItem);
+            } elseif ($this->userSession->isServiceAccount() === false) { // real users only
+                if ($userIdentifier !== $this->userSession->getUserIdentifier()) {
+                    throw new \RuntimeException('user data lookup is only allowed for the currently logged in user');
+                }
+
+                $userCacheItem = $this->userCache?->getItem($this->userSession->getSessionCacheKey().'-'.$userIdentifier);
+                if ($userCacheItem?->isHit()) {
+                    $userAttributes = $userCacheItem->get();
+                } else {
+                    $userAttributes = $this->getUserDataFromLdap($userIdentifier);
+                    $userCacheItem?->set($userAttributes);
+                    $userCacheItem?->expiresAfter($this->userSession->getSessionTTL() + 1);
+                    $this->userCache?->save($userCacheItem);
+                }
             }
         }
 
@@ -95,12 +89,16 @@ class UserAttributeProvider implements UserAttributeProviderInterface
             $ldapEntry = $this->ldapConnectionProvider->getConnection($this->ldapConnectionIdentifier)
                 ->getEntryByAttribute($this->ldapUserIdentifierAttribute, $userIdentifier);
         } catch (LdapException $exception) {
-            throw ApiError::withDetails(Response::HTTP_BAD_GATEWAY,
-                sprintf('failed to get user data from LDAP: \'%s\'', $exception->getMessage()));
+            throw match ($exception->getCode()) {
+                LdapException::SERVER_CONNECTION_FAILED => ApiError::withDetails(Response::HTTP_BAD_GATEWAY,
+                    'failed to connect to LDAP server'),
+                LdapException::ENTRY_NOT_FOUND => ApiError::withDetails(Response::HTTP_NOT_FOUND,
+                    sprintf('user not found in LDAP: \'%s\'', $userIdentifier)),
+                default => new \RuntimeException(
+                    sprintf('failed to get user data from LDAP for user \'%s\': \'%s\'',
+                        $userIdentifier, $exception->getMessage())),
+            };
         }
-
-        $event = new UserDataLoadedEvent($ldapEntry->getAttributeValues());
-        $this->eventDispatcher->dispatch($event);
 
         $userAttributes = [];
         foreach ($this->availableAttributes as $attributeName => $attributeData) {
@@ -112,7 +110,7 @@ class UserAttributeProvider implements UserAttributeProviderInterface
                     $attributeValue = $attributeData[self::IS_ARRAY_KEY] ? [$attributeValue] : $attributeValue;
                 }
             } else {
-                $attributeValue = $event->getUserAttributes()[$attributeName] ?? $attributeData[self::DEFAULT_VALUE_KEY];
+                $attributeValue = $attributeData[self::DEFAULT_VALUE_KEY];
             }
             $userAttributes[$attributeName] = $attributeValue;
         }

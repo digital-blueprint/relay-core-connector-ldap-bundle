@@ -7,7 +7,7 @@
         "php": ">=8.1",
         "ext-json": "*",
         "api-platform/core": "^3.2",
-        "dbp/relay-core-bundle": "^0.1.186",
+        "dbp/relay-core-bundle": "^0.1.196",
         "directorytree/ldaprecord": "^3.5",
         "illuminate/collections": "^10.48",
         "psr/cache": "^2.0 || ^3.0",

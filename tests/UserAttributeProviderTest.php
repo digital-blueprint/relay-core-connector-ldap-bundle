@@ -10,57 +10,39 @@ use Dbp\Relay\CoreConnectorLdapBundle\DependencyInjection\Configuration;
 use Dbp\Relay\CoreConnectorLdapBundle\Ldap\LdapConnectionProvider;
 use Dbp\Relay\CoreConnectorLdapBundle\Service\UserAttributeProvider;
 use PHPUnit\Framework\TestCase;
-use Symfony\Component\EventDispatcher\EventDispatcher;
+use Symfony\Component\Cache\Adapter\ArrayAdapter;
+use Symfony\Component\HttpFoundation\Response;
 
 class UserAttributeProviderTest extends TestCase
 {
-    private const TEST_CONNECTION_IDENTIFIER = 'TEST_CONNECTION';
-
     public const ROLES_ATTRIBUTE = 'roles';
     public const MISC_ATTRIBUTE = 'misc';
     public const MISC_ARRAY_ATTRIBUTE = 'misc_array';
 
-    public const LDAP_IDENTIFIER_ATTRIBUTE_NAME = 'ID';
+    public const LDAP_IDENTIFIER_ATTRIBUTE_NAME = 'cn';
     public const LDAP_ROLES_ATTRIBUTE_NAME = 'LDAP-ROLES';
 
     private UserAttributeProvider $userAttributeProvider;
-    private EventDispatcher $eventDispatcher;
+    private LdapConnectionProvider $ldapConnectionProvider;
 
     protected function setUp(): void
     {
-        parent::setUp();
-
-        $testUsers = [];
-        $this->addTestUser($testUsers, 'money82', ['VIEWER', 'EDITOR']);
-        $this->addTestUser($testUsers, 'penny80', ['VIEWER']);
-        $this->addTestUser($testUsers, 'sunny85', []);
-        $this->addTestUser($testUsers, 'honey90', null);
-
-        $ldapApi = new LdapConnectionProvider();
-        $ldapApi->addTestConnection(self::TEST_CONNECTION_IDENTIFIER, [], $testUsers);
-
-        $this->eventDispatcher = new EventDispatcher();
-
-        $this->userAttributeProvider = new UserAttributeProvider($ldapApi, new TestUserSession('user'), $this->eventDispatcher);
-        $this->userAttributeProvider->setConfig($this->createConfig()[Configuration::USER_ATTRIBUTE_PROVIDER_ATTRIBUTE]);
+        $this->ldapConnectionProvider = LdapConnectionProviderTest::createTestLdapConnectionProvider();
     }
 
-    private function addTestUser(array &$testUsers, string $identifier, ?array $roles)
+    private function setupUserAttributeProviderWithUser(string $userIdentifier = 'testuser', bool $isAuthenticated = true, bool $isServiceAccount = false): void
     {
-        $testUser = [];
-        $testUser[self::LDAP_IDENTIFIER_ATTRIBUTE_NAME] = [$identifier];
-        if ($roles !== null) {
-            $testUser[self::LDAP_ROLES_ATTRIBUTE_NAME] = $roles;
-        }
-
-        $testUsers[] = $testUser;
+        $this->userAttributeProvider = new UserAttributeProvider(
+            $this->ldapConnectionProvider, new TestUserSession(
+                $userIdentifier, isAuthenticated: $isAuthenticated, isServiceAccount: $isServiceAccount));
+        $this->userAttributeProvider->setConfig($this->createConfig()[Configuration::USER_ATTRIBUTE_PROVIDER_ATTRIBUTE]);
     }
 
     private function createConfig(): array
     {
         return [
             Configuration::USER_ATTRIBUTE_PROVIDER_ATTRIBUTE => [
-                Configuration::LDAP_CONNECTION_ATTRIBUTE => self::TEST_CONNECTION_IDENTIFIER,
+                Configuration::LDAP_CONNECTION_ATTRIBUTE => LdapConnectionProviderTest::FAKE_CONNECTION_ID,
                 Configuration::LDAP_USER_IDENTIFIER_ATTRIBUTE_ATTRIBUTE => self::LDAP_IDENTIFIER_ATTRIBUTE_NAME,
                 Configuration::ATTRIBUTES_ATTRIBUTE => [
                     [
@@ -86,64 +68,71 @@ class UserAttributeProviderTest extends TestCase
 
     public function testAttributeMapping()
     {
+        $this->setupUserAttributeProviderWithUser('money82');
+        $this->mockResultsFor('money82');
         $authzUserAttributes = $this->userAttributeProvider->getUserAttributes('money82');
 
         $this->assertCount(3, $authzUserAttributes);
-        $this->assertArrayHasKey(self::ROLES_ATTRIBUTE, $authzUserAttributes);
-        $roles = $authzUserAttributes[self::ROLES_ATTRIBUTE];
-        $this->assertCount(2, $roles);
-        $this->assertContains('VIEWER', $roles);
-        $this->assertContains('EDITOR', $roles);
+        $this->assertEquals(['VIEWER', 'EDITOR'], $authzUserAttributes[self::ROLES_ATTRIBUTE]);
 
+        $this->setupUserAttributeProviderWithUser('penny80');
+        $this->mockResultsFor('penny80');
         $authzUserAttributes = $this->userAttributeProvider->getUserAttributes('penny80');
 
         $this->assertCount(3, $authzUserAttributes);
-        $this->assertArrayHasKey(self::ROLES_ATTRIBUTE, $authzUserAttributes);
-        $roles = $authzUserAttributes[self::ROLES_ATTRIBUTE];
-        $this->assertCount(1, $roles);
-        $this->assertContains('VIEWER', $roles);
+        $this->assertEquals(['VIEWER'], $authzUserAttributes[self::ROLES_ATTRIBUTE]);
 
+        $this->setupUserAttributeProviderWithUser('sunny85');
+        $this->mockResultsFor('sunny85');
         $authzUserAttributes = $this->userAttributeProvider->getUserAttributes('sunny85');
 
         $this->assertCount(3, $authzUserAttributes);
-        $this->assertArrayHasKey(self::ROLES_ATTRIBUTE, $authzUserAttributes);
-        $roles = $authzUserAttributes[self::ROLES_ATTRIBUTE];
-        $this->assertEmpty($roles);
+        $this->assertEquals([], $authzUserAttributes[self::ROLES_ATTRIBUTE]);
     }
 
-    public function testUserDataLoadedEvent()
+    public function testCaching(): void
     {
-        // event subscriber writes the number of LDAP roles into self::MISC_ATTRIBUTE
-        $this->eventDispatcher->addSubscriber(new UserDataLoadedTestEventSubcriber());
+        // without caching
+        $this->setupUserAttributeProviderWithUser('money82');
+        $this->mockResultsFor('money82');
+        $this->userAttributeProvider->getUserAttributes('money82');
 
+        $this->mockResultsFor('foo');
+        try {
+            // no cahce -> new LDAP request causes 404 not found
+            $this->userAttributeProvider->getUserAttributes('money82');
+            $this->fail('entry not found exception not thrown as expected');
+        } catch (ApiError) {
+        }
+
+        // with caching
+        $this->userAttributeProvider->setCache(new ArrayAdapter());
+        $this->mockResultsFor('money82');
         $authzUserAttributes = $this->userAttributeProvider->getUserAttributes('money82');
-
         $this->assertCount(3, $authzUserAttributes);
-        $this->assertArrayHasKey(self::MISC_ATTRIBUTE, $authzUserAttributes);
-        $misc = $authzUserAttributes[self::MISC_ATTRIBUTE];
-        $this->assertEquals(2, $misc);
+        $this->assertEquals(['VIEWER', 'EDITOR'], $authzUserAttributes[self::ROLES_ATTRIBUTE]);
 
-        $authzUserAttributes = $this->userAttributeProvider->getUserAttributes('penny80');
+        $this->mockResultsFor('foo');
+        // no new LDAP request since user is found in cache
+        $authzUserAttributesCached = $this->userAttributeProvider->getUserAttributes('money82');
 
-        $this->assertCount(3, $authzUserAttributes);
-        $this->assertArrayHasKey(self::MISC_ATTRIBUTE, $authzUserAttributes);
-        $misc = $authzUserAttributes[self::MISC_ATTRIBUTE];
-        $this->assertEquals(1, $misc);
+        $this->assertSame($authzUserAttributes, $authzUserAttributesCached);
     }
 
     public function testDefaultValueLdapAttributeNotFound()
     {
+        $this->setupUserAttributeProviderWithUser('honey90');
+        $this->mockResultsFor('honey90');
         $authzUserAttributes = $this->userAttributeProvider->getUserAttributes('honey90');
 
         $this->assertCount(3, $authzUserAttributes);
-        $this->assertArrayHasKey(self::ROLES_ATTRIBUTE, $authzUserAttributes);
-        $roles = $authzUserAttributes[self::ROLES_ATTRIBUTE];
-        $this->assertCount(1, $roles);
-        $this->assertContains('DEFAULT', $roles);
+        $this->assertEquals(['DEFAULT'], $authzUserAttributes[self::ROLES_ATTRIBUTE]);
     }
 
     public function testDefaultValueLdapAttributeNotMapped()
     {
+        $this->setupUserAttributeProviderWithUser('money82');
+        $this->mockResultsFor('money82');
         $authzUserAttributes = $this->userAttributeProvider->getUserAttributes('money82');
 
         $this->assertCount(3, $authzUserAttributes);
@@ -158,22 +147,63 @@ class UserAttributeProviderTest extends TestCase
 
     public function testWithoutUserId()
     {
-        $this->assertEquals($this->userAttributeProvider->getUserAttributes(null),
-            [
-                self::ROLES_ATTRIBUTE => ['DEFAULT'],
-                self::MISC_ATTRIBUTE => 0,
-                self::MISC_ARRAY_ATTRIBUTE => [1, 2, 3],
-            ]);
+        // expecting all default values
+        $this->setupUserAttributeProviderWithUser();
+        $this->assertEquals([
+            self::ROLES_ATTRIBUTE => ['DEFAULT'],
+            self::MISC_ATTRIBUTE => 0,
+            self::MISC_ARRAY_ATTRIBUTE => [1, 2, 3],
+        ],
+            $this->userAttributeProvider->getUserAttributes(null));
+    }
+
+    public function testServiceAccount(): void
+    {
+        // expecting all default values
+        $this->setupUserAttributeProviderWithUser();
+        $this->assertEquals([
+            self::ROLES_ATTRIBUTE => ['DEFAULT'],
+            self::MISC_ATTRIBUTE => 0,
+            self::MISC_ARRAY_ATTRIBUTE => [1, 2, 3],
+        ],
+            $this->userAttributeProvider->getUserAttributes(null));
+    }
+
+    public function testUnauthenticated()
+    {
+        // this is allowed for debugging purposes
+        $this->setupUserAttributeProviderWithUser(isAuthenticated: false);
+        $this->mockResultsFor('money82');
+        $authzUserAttributes = $this->userAttributeProvider->getUserAttributes('money82');
+
+        $this->assertCount(3, $authzUserAttributes);
+        $this->assertEquals(['VIEWER', 'EDITOR'], $authzUserAttributes[self::ROLES_ATTRIBUTE]);
+    }
+
+    public function testUserIdentifierMismatch()
+    {
+        $this->setupUserAttributeProviderWithUser('foo');
+        $this->mockResultsFor('money82');
+        $this->expectException(\RuntimeException::class);
+        $this->userAttributeProvider->getUserAttributes('money82');
     }
 
     public function testUserNotFoundException()
     {
-        $this->expectException(ApiError::class);
-        $this->userAttributeProvider->getUserAttributes('not_found');
+        $this->setupUserAttributeProviderWithUser('foo');
+        $this->mockResultsFor('bar');
+        try {
+            $this->userAttributeProvider->getUserAttributes('foo');
+            $this->fail('exception not thrown as expected');
+        } catch (ApiError $apiError) {
+            $this->assertEquals(Response::HTTP_NOT_FOUND, $apiError->getStatusCode());
+        }
     }
 
     public function testMultipleAttributeDeclarationsException()
     {
+        $this->setupUserAttributeProviderWithUser();
+
         $config = $this->createConfig();
         // add duplicate attribute entry
         $config[Configuration::USER_ATTRIBUTE_PROVIDER_ATTRIBUTE][Configuration::ATTRIBUTES_ATTRIBUTE][] = [
@@ -183,5 +213,37 @@ class UserAttributeProviderTest extends TestCase
         ];
         $this->expectException(\RuntimeException::class);
         $this->userAttributeProvider->setConfig($config[Configuration::USER_ATTRIBUTE_PROVIDER_ATTRIBUTE]);
+    }
+
+    private function mockResultsFor(string $userIdentifier): void
+    {
+        $results = match ($userIdentifier) {
+            'money82' => [
+                [
+                    self::LDAP_IDENTIFIER_ATTRIBUTE_NAME => ['money82'],
+                    self::LDAP_ROLES_ATTRIBUTE_NAME => ['VIEWER', 'EDITOR'],
+                ],
+            ],
+            'penny80' => [
+                [
+                    self::LDAP_IDENTIFIER_ATTRIBUTE_NAME => ['penny80'],
+                    self::LDAP_ROLES_ATTRIBUTE_NAME => ['VIEWER'],
+                ],
+            ],
+            'sunny85' => [
+                [
+                    self::LDAP_IDENTIFIER_ATTRIBUTE_NAME => ['sunny85'],
+                    self::LDAP_ROLES_ATTRIBUTE_NAME => [],
+                ],
+            ],
+            'honey90' => [
+                [
+                    self::LDAP_IDENTIFIER_ATTRIBUTE_NAME => ['honey90'],
+                ],
+            ],
+            default => [],
+        };
+
+        LdapConnectionProviderTest::mockResults($this->ldapConnectionProvider, $results);
     }
 }

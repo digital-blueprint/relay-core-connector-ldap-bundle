@@ -1,5 +1,8 @@
 # Unreleased
 
+* Add mock tests for ldap connection provider and user attribute provider
+* Only allow retrieval of user attributes for currently logged-in user (except for debugging)
+
 # v0.2.7
 
 * Update core

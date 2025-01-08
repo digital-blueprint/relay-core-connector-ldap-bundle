@@ -16,5 +16,5 @@ interface LdapConnectionInterface
      *
      * @throws LdapException
      */
-    public function getEntries(int $currentPageNumber, int $maxNumItemsPerPage, array $options = []): array;
+    public function getEntries(int $currentPageNumber = 1, int $maxNumItemsPerPage = 30, array $options = []): array;
 }
