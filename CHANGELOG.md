@@ -1,6 +1,9 @@
 # Unreleased
 
+# v0.2.8
+
 * Add mock tests for ldap connection provider and user attribute provider
+* Allow use attribute lookup for users other than the logged-in user
 
 # v0.2.7
 
