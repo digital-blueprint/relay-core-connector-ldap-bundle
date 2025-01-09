@@ -4,14 +4,12 @@ declare(strict_types=1);
 
 namespace Dbp\Relay\CoreConnectorLdapBundle\Tests;
 
-use Dbp\Relay\CoreBundle\Exception\ApiError;
 use Dbp\Relay\CoreBundle\TestUtils\TestUserSession;
 use Dbp\Relay\CoreConnectorLdapBundle\DependencyInjection\Configuration;
 use Dbp\Relay\CoreConnectorLdapBundle\Ldap\LdapConnectionProvider;
 use Dbp\Relay\CoreConnectorLdapBundle\Service\UserAttributeProvider;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\Cache\Adapter\ArrayAdapter;
-use Symfony\Component\HttpFoundation\Response;
 
 class UserAttributeProviderTest extends TestCase
 {
@@ -95,15 +93,11 @@ class UserAttributeProviderTest extends TestCase
         // without caching
         $this->setupUserAttributeProviderWithUser('money82');
         $this->mockResultsFor('money82');
-        $this->userAttributeProvider->getUserAttributes('money82');
+        $authzUserAttributes = $this->userAttributeProvider->getUserAttributes('money82');
 
         $this->mockResultsFor('foo');
-        try {
-            // no cahce -> new LDAP request causes 404 not found
-            $this->userAttributeProvider->getUserAttributes('money82');
-            $this->fail('entry not found exception not thrown as expected');
-        } catch (ApiError) {
-        }
+        $authzUserAttributesCached = $this->userAttributeProvider->getUserAttributes('money82');
+        $this->assertNotSame($authzUserAttributes, $authzUserAttributesCached);
 
         // with caching
         $this->userAttributeProvider->setCache(new ArrayAdapter());
@@ -157,18 +151,6 @@ class UserAttributeProviderTest extends TestCase
             $this->userAttributeProvider->getUserAttributes(null));
     }
 
-    public function testServiceAccount(): void
-    {
-        // expecting all default values
-        $this->setupUserAttributeProviderWithUser();
-        $this->assertEquals([
-            self::ROLES_ATTRIBUTE => ['DEFAULT'],
-            self::MISC_ATTRIBUTE => 0,
-            self::MISC_ARRAY_ATTRIBUTE => [1, 2, 3],
-        ],
-            $this->userAttributeProvider->getUserAttributes(null));
-    }
-
     public function testUnauthenticated()
     {
         // this is allowed for debugging purposes
@@ -182,22 +164,26 @@ class UserAttributeProviderTest extends TestCase
 
     public function testUserIdentifierMismatch()
     {
+        // it's allowed to request attributes for users other than the logged-in user
         $this->setupUserAttributeProviderWithUser('foo');
         $this->mockResultsFor('money82');
-        $this->expectException(\RuntimeException::class);
-        $this->userAttributeProvider->getUserAttributes('money82');
+        $authzUserAttributes = $this->userAttributeProvider->getUserAttributes('money82');
+        $this->assertCount(3, $authzUserAttributes);
+        $this->assertEquals(['VIEWER', 'EDITOR'], $authzUserAttributes[self::ROLES_ATTRIBUTE]);
     }
 
-    public function testUserNotFoundException()
+    public function testUserNotFound()
     {
         $this->setupUserAttributeProviderWithUser('foo');
-        $this->mockResultsFor('bar');
-        try {
-            $this->userAttributeProvider->getUserAttributes('foo');
-            $this->fail('exception not thrown as expected');
-        } catch (ApiError $apiError) {
-            $this->assertEquals(Response::HTTP_NOT_FOUND, $apiError->getStatusCode());
-        }
+        $this->mockResultsFor();
+        // expecting all default values
+        $this->setupUserAttributeProviderWithUser();
+        $this->assertEquals([
+            self::ROLES_ATTRIBUTE => ['DEFAULT'],
+            self::MISC_ATTRIBUTE => 0,
+            self::MISC_ARRAY_ATTRIBUTE => [1, 2, 3],
+        ],
+            $this->userAttributeProvider->getUserAttributes('foo'));
     }
 
     public function testMultipleAttributeDeclarationsException()
@@ -215,7 +201,10 @@ class UserAttributeProviderTest extends TestCase
         $this->userAttributeProvider->setConfig($config[Configuration::USER_ATTRIBUTE_PROVIDER_ATTRIBUTE]);
     }
 
-    private function mockResultsFor(string $userIdentifier): void
+    /**
+     * @param string|null $userIdentifier null means empty result set -> user not found
+     */
+    private function mockResultsFor(?string $userIdentifier = null): void
     {
         $results = match ($userIdentifier) {
             'money82' => [

@@ -6,7 +6,7 @@
     "require": {
         "php": ">=8.1",
         "ext-json": "*",
-        "api-platform/core": "^3.2",
+        "api-platform/core": "^3.2.21",
         "dbp/relay-core-bundle": "^0.1.198",
         "directorytree/ldaprecord": "^3.7.6",
         "illuminate/collections": "^10.48",
@@ -16,7 +16,6 @@
         "symfony/config": "^5.4 || ^6.4",
         "symfony/dependency-injection": "^5.4 || ^6.4",
         "symfony/event-dispatcher": "^5.4 || ^6.4",
-        "symfony/event-dispatcher-contracts": "^2.5 || ^3",
         "symfony/framework-bundle": "^5.4 || ^6.4",
         "symfony/http-foundation": "^5.4 || ^6.4",
         "symfony/http-kernel": "^5.4 || ^6.4"

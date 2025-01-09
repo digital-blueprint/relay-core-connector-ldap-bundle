@@ -54,23 +54,14 @@ class UserAttributeProvider implements UserAttributeProviderInterface
         $userAttributes = null;
 
         if (Tools::isNullOrEmpty($userIdentifier) === false) {
-            if (!$this->userSession->isAuthenticated()) {
-                // in case there is no session, e.g. for debug purposes
+            $userCacheItem = $this->userCache?->getItem($this->userSession->getSessionCacheKey().'-'.$userIdentifier);
+            if ($userCacheItem?->isHit()) {
+                $userAttributes = $userCacheItem->get();
+            } else {
                 $userAttributes = $this->getUserDataFromLdap($userIdentifier);
-            } elseif ($this->userSession->isServiceAccount() === false) { // real users only
-                if ($userIdentifier !== $this->userSession->getUserIdentifier()) {
-                    throw new \RuntimeException('user data lookup is only allowed for the currently logged in user');
-                }
-
-                $userCacheItem = $this->userCache?->getItem($this->userSession->getSessionCacheKey().'-'.$userIdentifier);
-                if ($userCacheItem?->isHit()) {
-                    $userAttributes = $userCacheItem->get();
-                } else {
-                    $userAttributes = $this->getUserDataFromLdap($userIdentifier);
-                    $userCacheItem?->set($userAttributes);
-                    $userCacheItem?->expiresAfter($this->userSession->getSessionTTL() + 1);
-                    $this->userCache?->save($userCacheItem);
-                }
+                $userCacheItem?->set($userAttributes);
+                $userCacheItem?->expiresAfter($this->userSession->getSessionTTL() + 1);
+                $this->userCache?->save($userCacheItem);
             }
         }
 
@@ -85,25 +76,26 @@ class UserAttributeProvider implements UserAttributeProviderInterface
      */
     private function getUserDataFromLdap(string $userIdentifier): array
     {
+        $ldapEntry = null;
         try {
             $ldapEntry = $this->ldapConnectionProvider->getConnection($this->ldapConnectionIdentifier)
                 ->getEntryByAttribute($this->ldapUserIdentifierAttribute, $userIdentifier);
         } catch (LdapException $exception) {
-            throw match ($exception->getCode()) {
-                LdapException::SERVER_CONNECTION_FAILED => ApiError::withDetails(Response::HTTP_BAD_GATEWAY,
-                    'failed to connect to LDAP server'),
-                LdapException::ENTRY_NOT_FOUND => ApiError::withDetails(Response::HTTP_NOT_FOUND,
-                    sprintf('user not found in LDAP: \'%s\'', $userIdentifier)),
-                default => new \RuntimeException(
-                    sprintf('failed to get user data from LDAP for user \'%s\': \'%s\'',
-                        $userIdentifier, $exception->getMessage())),
-            };
+            if ($exception->getCode() !== LdapException::ENTRY_NOT_FOUND) {
+                throw match ($exception->getCode()) {
+                    LdapException::SERVER_CONNECTION_FAILED => ApiError::withDetails(Response::HTTP_BAD_GATEWAY,
+                        'failed to connect to LDAP server'),
+                    default => new \RuntimeException(
+                        sprintf('failed to get user data from LDAP for user \'%s\': \'%s\' (code: %d)',
+                            $userIdentifier, $exception->getMessage(), $exception->getCode())),
+                };
+            }
         }
 
         $userAttributes = [];
         foreach ($this->availableAttributes as $attributeName => $attributeData) {
             if (($mappedLdapAttribute = $attributeData[self::LDAP_ATTRIBUTE_KEY] ?? null) !== null
-                && ($attributeValue = $ldapEntry->getAttributeValue($mappedLdapAttribute, null)) !== null) {
+                && ($attributeValue = $ldapEntry?->getAttributeValue($mappedLdapAttribute, null)) !== null) {
                 if (is_array($attributeValue)) {
                     $attributeValue = $attributeData[self::IS_ARRAY_KEY] ? $attributeValue : $attributeValue[0];
                 } else {
