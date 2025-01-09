@@ -61,9 +61,6 @@
         "phpstan": [
             "@php vendor/bin/phpstan analyze --ansi"
         ],
-        "psalm": [
-            "@php vendor/bin/psalm"
-        ],
         "lint": [
             "@composer run cs",
             "@composer run phpstan"
