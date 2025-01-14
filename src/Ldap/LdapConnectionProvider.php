@@ -5,9 +5,6 @@ declare(strict_types=1);
 namespace Dbp\Relay\CoreConnectorLdapBundle\Ldap;
 
 use Dbp\Relay\CoreConnectorLdapBundle\DependencyInjection\Configuration;
-use LdapRecord\Connection;
-use LdapRecord\Container;
-use LdapRecord\Testing\DirectoryFake;
 use Psr\Cache\CacheItemPoolInterface;
 use Psr\Log\LoggerAwareInterface;
 use Psr\Log\LoggerAwareTrait;
@@ -16,7 +13,7 @@ class LdapConnectionProvider implements LoggerAwareInterface
 {
     use LoggerAwareTrait;
 
-    private array $connectionConfigs = [];
+    protected array $connectionConfigs = [];
 
     /** @var CacheItemPoolInterface[] */
     private array $cachePools = [];
@@ -73,25 +70,6 @@ class LdapConnectionProvider implements LoggerAwareInterface
         ];
 
         return new LdapConnection($connectionConfig);
-    }
-
-    public function makeFakeConnection(string $connectionIdentifier): void
-    {
-        try {
-            $connection = $this->getConnection($connectionIdentifier);
-            assert($connection instanceof LdapConnection);
-
-            Container::getInstance()->addConnection(
-                new Connection(LdapConnection::toLdapRecordConnectionConfig(
-                    $this->connectionConfigs[$connectionIdentifier])), $connectionIdentifier);
-
-            $connectionFake = DirectoryFake::setup($connectionIdentifier);
-            $connectionFake->actingAs('cn=admin,dc=local,dc=com');
-            $connectionFake->shouldNotBeConnected();
-            $connection->setFakeConnection($connectionFake);
-        } catch (\Exception $exception) {
-            throw new \RuntimeException('make connection fake failed: '.$exception->getMessage());
-        }
     }
 
     public function getConnectionIdentifiers(): array

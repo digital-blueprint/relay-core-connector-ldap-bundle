@@ -338,7 +338,7 @@ class LdapConnection implements LoggerAwareInterface, LdapConnectionInterface
         $this->connectionConfig = self::toLdapRecordConnectionConfig($config);
     }
 
-    public function setFakeConnection(ConnectionFake $connectionFake): void
+    public function setMockConnection(ConnectionFake $connectionFake): void
     {
         $this->connection = $connectionFake;
     }
@@ -349,5 +349,13 @@ class LdapConnection implements LoggerAwareInterface, LdapConnectionInterface
     public function getConnection(): Connection
     {
         return $this->connection;
+    }
+
+    /**
+     * For testing purposes only.
+     */
+    public function getConnectionConfig(): array
+    {
+        return $this->connectionConfig;
     }
 }

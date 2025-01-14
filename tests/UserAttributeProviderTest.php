@@ -6,8 +6,8 @@ namespace Dbp\Relay\CoreConnectorLdapBundle\Tests;
 
 use Dbp\Relay\CoreBundle\TestUtils\TestUserSession;
 use Dbp\Relay\CoreConnectorLdapBundle\DependencyInjection\Configuration;
-use Dbp\Relay\CoreConnectorLdapBundle\Ldap\LdapConnectionProvider;
 use Dbp\Relay\CoreConnectorLdapBundle\Service\UserAttributeProvider;
+use Dbp\Relay\CoreConnectorLdapBundle\TestUtils\TestLdapConnectionProvider;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\Cache\Adapter\ArrayAdapter;
 
@@ -20,18 +20,23 @@ class UserAttributeProviderTest extends TestCase
     public const LDAP_IDENTIFIER_ATTRIBUTE_NAME = 'cn';
     public const LDAP_ROLES_ATTRIBUTE_NAME = 'LDAP-ROLES';
 
-    private UserAttributeProvider $userAttributeProvider;
-    private LdapConnectionProvider $ldapConnectionProvider;
+    private ?UserAttributeProvider $userAttributeProvider;
+    private ?TestLdapConnectionProvider $testLdapConnectionProvider;
 
     protected function setUp(): void
     {
-        $this->ldapConnectionProvider = LdapConnectionProviderTest::createTestLdapConnectionProvider();
+        $this->testLdapConnectionProvider = TestLdapConnectionProvider::create();
+    }
+
+    protected function tearDown(): void
+    {
+        $this->testLdapConnectionProvider->cleanup();
     }
 
     private function setupUserAttributeProviderWithUser(string $userIdentifier = 'testuser', bool $isAuthenticated = true, bool $isServiceAccount = false): void
     {
         $this->userAttributeProvider = new UserAttributeProvider(
-            $this->ldapConnectionProvider, new TestUserSession(
+            $this->testLdapConnectionProvider, new TestUserSession(
                 $userIdentifier, isAuthenticated: $isAuthenticated, isServiceAccount: $isServiceAccount));
         $this->userAttributeProvider->setConfig($this->createConfig()[Configuration::USER_ATTRIBUTE_PROVIDER_ATTRIBUTE]);
     }
@@ -40,7 +45,7 @@ class UserAttributeProviderTest extends TestCase
     {
         return [
             Configuration::USER_ATTRIBUTE_PROVIDER_ATTRIBUTE => [
-                Configuration::LDAP_CONNECTION_ATTRIBUTE => LdapConnectionProviderTest::FAKE_CONNECTION_ID,
+                Configuration::LDAP_CONNECTION_ATTRIBUTE => TestLdapConnectionProvider::DEFAULT_CONNECTION_IDENTIFIER,
                 Configuration::LDAP_USER_IDENTIFIER_ATTRIBUTE_ATTRIBUTE => self::LDAP_IDENTIFIER_ATTRIBUTE_NAME,
                 Configuration::ATTRIBUTES_ATTRIBUTE => [
                     [
@@ -69,21 +74,18 @@ class UserAttributeProviderTest extends TestCase
         $this->setupUserAttributeProviderWithUser('money82');
         $this->mockResultsFor('money82');
         $authzUserAttributes = $this->userAttributeProvider->getUserAttributes('money82');
-
         $this->assertCount(3, $authzUserAttributes);
         $this->assertEquals(['VIEWER', 'EDITOR'], $authzUserAttributes[self::ROLES_ATTRIBUTE]);
 
         $this->setupUserAttributeProviderWithUser('penny80');
         $this->mockResultsFor('penny80');
         $authzUserAttributes = $this->userAttributeProvider->getUserAttributes('penny80');
-
         $this->assertCount(3, $authzUserAttributes);
         $this->assertEquals(['VIEWER'], $authzUserAttributes[self::ROLES_ATTRIBUTE]);
 
         $this->setupUserAttributeProviderWithUser('sunny85');
         $this->mockResultsFor('sunny85');
         $authzUserAttributes = $this->userAttributeProvider->getUserAttributes('sunny85');
-
         $this->assertCount(3, $authzUserAttributes);
         $this->assertEquals([], $authzUserAttributes[self::ROLES_ATTRIBUTE]);
     }
@@ -233,6 +235,6 @@ class UserAttributeProviderTest extends TestCase
             default => [],
         };
 
-        LdapConnectionProviderTest::mockResults($this->ldapConnectionProvider, $results);
+        $this->testLdapConnectionProvider->mockResults($results);
     }
 }
