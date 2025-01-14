@@ -1,5 +1,9 @@
 # Unreleased
 
+# v0.2.9
+
+* Provide TestLdapConnectionProvider for other bundles to mock LDAP responses
+
 # v0.2.8
 
 * Add mock tests for ldap connection provider and user attribute provider
