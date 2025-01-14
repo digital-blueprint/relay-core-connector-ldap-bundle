@@ -16,28 +16,21 @@ use LdapRecord\Testing\LdapFake;
 
 class TestLdapConnectionProvider extends LdapConnectionProvider
 {
-    public const DEFAULT_CONNECTION_IDENTIFIER = 'mock_connection_id';
+    public const DEFAULT_CONNECTION_IDENTIFIER = 'default_connection_id';
 
     public const DEFAULT_CONFIG = [
         Configuration::CONNECTIONS_ATTRIBUTE => [
             [
                 Configuration::LDAP_CONNECTION_IDENTIFIER_ATTRIBUTE => self::DEFAULT_CONNECTION_IDENTIFIER,
-                Configuration::LDAP_HOST_ATTRIBUTE => self::TEST_HOST,
-                Configuration::LDAP_BASE_DN_ATTRIBUTE => self::TEST_BASE_DN,
-                Configuration::LDAP_USERNAME_ATTRIBUTE => self::TEST_USERNAME,
-                Configuration::LDAP_PASSWORD_ATTRIBUTE => self::TEST_PASSWORD,
-                Configuration::LDAP_ENCRYPTION_ATTRIBUTE => self::TEST_ENCRYPTION,
-                Configuration::LDAP_OBJECT_CLASS_ATTRIBUTE => self::TEST_OBJECT_CLASS,
+                Configuration::LDAP_HOST_ATTRIBUTE => 'ldap.com',
+                Configuration::LDAP_BASE_DN_ATTRIBUTE => 'dc=example,dc=com',
+                Configuration::LDAP_USERNAME_ATTRIBUTE => 'user',
+                Configuration::LDAP_PASSWORD_ATTRIBUTE => 'secret',
+                Configuration::LDAP_ENCRYPTION_ATTRIBUTE => 'start_tls',
+                Configuration::LDAP_OBJECT_CLASS_ATTRIBUTE => 'person',
             ],
         ],
     ];
-
-    private const TEST_HOST = 'localhost';
-    private const TEST_BASE_DN = 'dc=example,dc=com';
-    private const TEST_USERNAME = 'user';
-    private const TEST_PASSWORD = 'secret';
-    private const TEST_OBJECT_CLASS = 'person';
-    private const TEST_ENCRYPTION = 'plain';
 
     public static function create(): TestLdapConnectionProvider
     {
@@ -45,6 +38,11 @@ class TestLdapConnectionProvider extends LdapConnectionProvider
         $provider->setConfig(self::DEFAULT_CONFIG);
 
         return $provider;
+    }
+
+    public function useInApiTest(\Symfony\Component\DependencyInjection\Container $container): void
+    {
+        $container->set(LdapConnectionProvider::class, $this);
     }
 
     public function mockResults(array $results = [], string $mockConnectionIdentifier = self::DEFAULT_CONNECTION_IDENTIFIER): void
