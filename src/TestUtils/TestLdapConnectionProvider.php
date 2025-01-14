@@ -18,7 +18,7 @@ class TestLdapConnectionProvider extends LdapConnectionProvider
 {
     public const DEFAULT_CONNECTION_IDENTIFIER = 'mock_connection_id';
 
-    private const DEFAULT_CONFIG = [
+    public const DEFAULT_CONFIG = [
         Configuration::CONNECTIONS_ATTRIBUTE => [
             [
                 Configuration::LDAP_CONNECTION_IDENTIFIER_ATTRIBUTE => self::DEFAULT_CONNECTION_IDENTIFIER,
