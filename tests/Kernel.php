@@ -7,6 +7,7 @@ namespace Dbp\Relay\CoreConnectorLdapBundle\Tests;
 use ApiPlatform\Symfony\Bundle\ApiPlatformBundle;
 use Dbp\Relay\CoreBundle\DbpRelayCoreBundle;
 use Dbp\Relay\CoreConnectorLdapBundle\DbpRelayCoreConnectorLdapBundle;
+use Dbp\Relay\CoreConnectorLdapBundle\TestUtils\TestLdapConnectionProvider;
 use Nelmio\CorsBundle\NelmioCorsBundle;
 use Symfony\Bundle\FrameworkBundle\FrameworkBundle;
 use Symfony\Bundle\FrameworkBundle\Kernel\MicroKernelTrait;
@@ -41,6 +42,8 @@ class Kernel extends BaseKernel
 
     protected function configureContainer(ContainerConfigurator $container, LoaderInterface $loader)
     {
+        $container->services()->set(TestLdapConnectionProvider::class)->public();
+
         $container->import('@DbpRelayCoreBundle/Resources/config/services_test.yaml');
         $container->extension('framework', [
             'test' => true,

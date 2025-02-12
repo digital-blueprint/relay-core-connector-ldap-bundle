@@ -54,14 +54,18 @@ class UserAttributeProvider implements UserAttributeProviderInterface
         $userAttributes = null;
 
         if (Tools::isNullOrEmpty($userIdentifier) === false) {
-            $userCacheItem = $this->userCache?->getItem($this->userSession->getSessionCacheKey().'-'.$userIdentifier);
-            if ($userCacheItem?->isHit()) {
+            $userCacheItem = null;
+            if ($this->userSession->isAuthenticated() // non-authenticated is allowed for debug command
+                && ($userCacheItem = $this->userCache?->getItem($this->userSession->getSessionCacheKey().'-'.$userIdentifier))
+                && $userCacheItem->isHit()) {
                 $userAttributes = $userCacheItem->get();
             } else {
                 $userAttributes = $this->getUserDataFromLdap($userIdentifier);
-                $userCacheItem?->set($userAttributes);
-                $userCacheItem?->expiresAfter($this->userSession->getSessionTTL() + 1);
-                $this->userCache?->save($userCacheItem);
+                if ($userCacheItem) {
+                    $userCacheItem->set($userAttributes);
+                    $userCacheItem->expiresAfter($this->userSession->getSessionTTL() + 1);
+                    $this->userCache->save($userCacheItem);
+                }
             }
         }
 

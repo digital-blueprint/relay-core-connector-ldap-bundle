@@ -1,5 +1,9 @@
 # Unreleased
 
+# v0.2.10
+
+* Re-Allow getting user attributes for debug purposes (without user session)
+
 # v0.2.9
 
 * Provide TestLdapConnectionProvider for other bundles to mock LDAP responses
