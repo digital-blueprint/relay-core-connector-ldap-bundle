@@ -399,16 +399,16 @@
         },
         {
             "name": "directorytree/ldaprecord",
-            "version": "v3.7.6",
+            "version": "v3.7.7",
             "source": {
                 "type": "git",
                 "url": "https://github.com/DirectoryTree/LdapRecord.git",
-                "reference": "9df53be0893d361f2a383d41f715268a8a7f596c"
+                "reference": "885cf99c709ceaccfe19062b4a48870eebf1ddda"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/DirectoryTree/LdapRecord/zipball/9df53be0893d361f2a383d41f715268a8a7f596c",
-                "reference": "9df53be0893d361f2a383d41f715268a8a7f596c",
+                "url": "https://api.github.com/repos/DirectoryTree/LdapRecord/zipball/885cf99c709ceaccfe19062b4a48870eebf1ddda",
+                "reference": "885cf99c709ceaccfe19062b4a48870eebf1ddda",
                 "shasum": ""
             },
             "require": {
@@ -471,7 +471,7 @@
                     "type": "github"
                 }
             ],
-            "time": "2024-12-07T01:11:37+00:00"
+            "time": "2025-02-13T14:55:09+00:00"
         },
         {
             "name": "doctrine/collections",
@@ -2061,16 +2061,16 @@
         },
         {
             "name": "nesbot/carbon",
-            "version": "3.8.4",
+            "version": "3.8.5",
             "source": {
                 "type": "git",
                 "url": "https://github.com/CarbonPHP/carbon.git",
-                "reference": "129700ed449b1f02d70272d2ac802357c8c30c58"
+                "reference": "b1a53a27898639579a67de42e8ced5d5386aa9a4"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/CarbonPHP/carbon/zipball/129700ed449b1f02d70272d2ac802357c8c30c58",
-                "reference": "129700ed449b1f02d70272d2ac802357c8c30c58",
+                "url": "https://api.github.com/repos/CarbonPHP/carbon/zipball/b1a53a27898639579a67de42e8ced5d5386aa9a4",
+                "reference": "b1a53a27898639579a67de42e8ced5d5386aa9a4",
                 "shasum": ""
             },
             "require": {
@@ -2146,8 +2146,8 @@
             ],
             "support": {
                 "docs": "https://carbon.nesbot.com/docs",
-                "issues": "https://github.com/briannesbitt/Carbon/issues",
-                "source": "https://github.com/briannesbitt/Carbon"
+                "issues": "https://github.com/CarbonPHP/carbon/issues",
+                "source": "https://github.com/CarbonPHP/carbon"
             },
             "funding": [
                 {
@@ -2163,7 +2163,7 @@
                     "type": "tidelift"
                 }
             ],
-            "time": "2024-12-27T09:25:35+00:00"
+            "time": "2025-02-11T16:28:45+00:00"
         },
         {
             "name": "psr/cache",
