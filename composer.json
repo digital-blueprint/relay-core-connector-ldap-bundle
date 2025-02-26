@@ -9,7 +9,6 @@
         "api-platform/core": "^3.2.21",
         "dbp/relay-core-bundle": "^0.1.198",
         "directorytree/ldaprecord": "^3.7.6",
-        "illuminate/collections": "^10.48",
         "psr/cache": "^2.0 || ^3.0",
         "psr/log": "^2.0 || ^3.0",
         "symfony/cache": "^5.4 || ^6.4",
@@ -32,7 +31,8 @@
         "symfony/phpunit-bridge": "^7.0.4"
     },
     "conflict": {
-        "nesbot/carbon": "<3.8"
+        "nesbot/carbon": "<3.8",
+        "illuminate/collections": "<10.48"
     },
     "autoload": {
         "psr-4": {
