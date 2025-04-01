@@ -123,14 +123,6 @@ class LdapConnection implements LoggerAwareInterface, LdapConnectionInterface
         }
     }
 
-    private static function addSortToQuery(Builder $queryBuilder, Sort $sort): void
-    {
-        foreach ($sort->getSortFields() as $sortField) {
-            $queryBuilder->orderBy(Sort::getPath($sortField),
-                Sort::getDirection($sortField) === Sort::ASCENDING_DIRECTION ? 'asc' : 'desc');
-        }
-    }
-
     public function __construct(array $config, ?CacheItemPoolInterface $cacheItemPool = null, int $ttl = 0)
     {
         $this->cacheItemPool = $ttl > 0 ? $cacheItemPool : null;
