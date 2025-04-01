@@ -6,7 +6,7 @@
     "require": {
         "php": ">=8.2",
         "ext-json": "*",
-        "api-platform/core": "^3.2.21",
+        "api-platform/core": "^3.4",
         "dbp/relay-core-bundle": "^0.1.198",
         "directorytree/ldaprecord": "^3.7.6",
         "psr/cache": "^2.0 || ^3.0",
