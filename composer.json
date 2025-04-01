@@ -11,13 +11,13 @@
         "directorytree/ldaprecord": "^3.7.6",
         "psr/cache": "^2.0 || ^3.0",
         "psr/log": "^2.0 || ^3.0",
-        "symfony/cache": "^5.4 || ^6.4",
-        "symfony/config": "^5.4 || ^6.4",
-        "symfony/dependency-injection": "^5.4 || ^6.4",
-        "symfony/event-dispatcher": "^5.4 || ^6.4",
-        "symfony/framework-bundle": "^5.4 || ^6.4",
-        "symfony/http-foundation": "^5.4 || ^6.4",
-        "symfony/http-kernel": "^5.4 || ^6.4"
+        "symfony/cache": "^6.4",
+        "symfony/config": "^6.4",
+        "symfony/dependency-injection": "^6.4",
+        "symfony/event-dispatcher": "^6.4",
+        "symfony/framework-bundle": "^6.4",
+        "symfony/http-foundation": "^6.4",
+        "symfony/http-kernel": "^6.4"
     },
     "require-dev": {
         "friendsofphp/php-cs-fixer": "^3.50",
@@ -25,8 +25,8 @@
         "phpstan/phpstan-phpunit": "^2.0.0",
         "phpstan/phpstan-symfony": "^2.0.0",
         "phpunit/phpunit": "^10.1",
-        "symfony/browser-kit": "^5.4 || ^6.4",
-        "symfony/http-client": "^5.4 || ^6.4",
+        "symfony/browser-kit": "^6.4",
+        "symfony/http-client": "^6.4",
         "symfony/monolog-bundle": "^3.10",
         "symfony/phpunit-bridge": "^7.0.4"
     },
