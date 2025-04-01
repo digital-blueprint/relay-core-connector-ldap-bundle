@@ -24,8 +24,8 @@ class LdapConnectionProvider implements LoggerAwareInterface
     public function setConfig(array $config): void
     {
         $this->connectionConfigs = [];
-        foreach ($config[Configuration::CONNECTIONS_ATTRIBUTE] as $connection) {
-            $this->connectionConfigs[$connection[Configuration::LDAP_CONNECTION_IDENTIFIER_ATTRIBUTE]] = $connection;
+        foreach ($config[Configuration::CONNECTIONS_ATTRIBUTE] as $connectionIdentifier => $connection) {
+            $this->connectionConfigs[$connectionIdentifier] = $connection;
         }
     }
 

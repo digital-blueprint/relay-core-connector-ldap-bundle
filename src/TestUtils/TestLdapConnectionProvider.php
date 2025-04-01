@@ -20,8 +20,7 @@ class TestLdapConnectionProvider extends LdapConnectionProvider
 
     public const DEFAULT_CONFIG = [
         Configuration::CONNECTIONS_ATTRIBUTE => [
-            [
-                Configuration::LDAP_CONNECTION_IDENTIFIER_ATTRIBUTE => self::DEFAULT_CONNECTION_IDENTIFIER,
+            self::DEFAULT_CONNECTION_IDENTIFIER => [
                 Configuration::LDAP_HOST_ATTRIBUTE => 'ldap.com',
                 Configuration::LDAP_BASE_DN_ATTRIBUTE => 'dc=example,dc=com',
                 Configuration::LDAP_USERNAME_ATTRIBUTE => 'user',

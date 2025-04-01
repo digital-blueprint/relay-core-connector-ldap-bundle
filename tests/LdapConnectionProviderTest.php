@@ -59,8 +59,7 @@ class LdapConnectionProviderTest extends TestCase
     {
         return [
             Configuration::CONNECTIONS_ATTRIBUTE => [
-                [
-                    Configuration::LDAP_CONNECTION_IDENTIFIER_ATTRIBUTE => 'connection_1',
+                'connection_1' => [
                     Configuration::LDAP_HOST_ATTRIBUTE => self::TEST_HOST,
                     Configuration::LDAP_BASE_DN_ATTRIBUTE => self::TEST_BASE_DN,
                     Configuration::LDAP_USERNAME_ATTRIBUTE => self::TEST_USERNAME,
@@ -68,8 +67,7 @@ class LdapConnectionProviderTest extends TestCase
                     Configuration::LDAP_ENCRYPTION_ATTRIBUTE => self::TEST_ENCRYPTION,
                     Configuration::LDAP_OBJECT_CLASS_ATTRIBUTE => self::TEST_OBJECT_CLASS,
                 ],
-                [
-                    Configuration::LDAP_CONNECTION_IDENTIFIER_ATTRIBUTE => 'connection_2',
+                'connection_2' => [
                     Configuration::LDAP_HOST_ATTRIBUTE => self::TEST_HOST,
                     Configuration::LDAP_BASE_DN_ATTRIBUTE => self::TEST_BASE_DN,
                     Configuration::LDAP_USERNAME_ATTRIBUTE => self::TEST_USERNAME,

@@ -94,12 +94,9 @@ class Configuration implements ConfigurationInterface
         $treeBuilder = new TreeBuilder(self::CONNECTIONS_ATTRIBUTE);
 
         return $treeBuilder->getRootNode()
+                ->useAttributeAsKey(self::LDAP_CONNECTION_IDENTIFIER_ATTRIBUTE)
                 ->arrayPrototype()
                     ->children()
-                        ->scalarNode(self::LDAP_CONNECTION_IDENTIFIER_ATTRIBUTE)
-                          ->cannotBeEmpty()
-                          ->isRequired()
-                        ->end()
                         ->scalarNode(self::LDAP_HOST_ATTRIBUTE)
                           ->cannotBeEmpty()
                           ->isRequired()
