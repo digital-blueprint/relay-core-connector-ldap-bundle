@@ -7,15 +7,24 @@ used for access control from an LDAP server.
 
 ```yaml
     dbp_relay_core_connector_ldap:
-      ldap_connection: '%env(LDAP_CONNECTION)%'
-      attributes:
-        - name: functions
-          ldap_attribute: USER-FUNCTIONS
-          is_array: true # default: false
-        - name: ...
+      connections:
+        - identifier: DEFAULT
+          host: '%env(LDAP_HOST)%'
+          base_dn: '%env(LDAP_BASE_DN)%'
+          username: '%env(LDAP_USER)%'
+          password: '%env(LDAP_PASS)%'
+      user_attribute_provider:
+        ldap_connection: '%env(LDAP_CONNECTION)%'
+        attributes:
+          - name: functions
+            ldap_attribute: USER-FUNCTIONS
+            is_array: true # default: false
+          - name: ...
 ```
 
-The ```ldap_connection``` node specifies which LDAP connection to use (see ```dbp/relay-ldap-bundle```).
+### User Attribute Provider
+
+The ```ldap_connection``` node specifies which LDAP connection to use.
 The ```attributes``` node defines a mapping between LDAP (i.e. source) user attributes and access control (i.e. target) 
 user attributes:
 
