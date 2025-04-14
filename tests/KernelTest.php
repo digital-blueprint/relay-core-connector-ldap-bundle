@@ -4,13 +4,13 @@ declare(strict_types=1);
 
 namespace Dbp\Relay\CoreConnectorLdapBundle\Tests;
 
-use ApiPlatform\Symfony\Bundle\Test\ApiTestCase;
+use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 
-class KernelTest extends ApiTestCase
+class KernelTest extends KernelTestCase
 {
     public function testBasics()
     {
-        $client = static::createClient();
-        $this->assertNotNull($client);
+        $container = static::getContainer();
+        $this->assertNotNull($container);
     }
 }
