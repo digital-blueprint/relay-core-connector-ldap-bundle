@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+## v0.2.12
+
+* Dependency cleanups
+
 ## v0.2.11
 
 * Drop support for PHP 8.1
