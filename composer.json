@@ -19,6 +19,7 @@
         "symfony/http-kernel": "^6.4"
     },
     "require-dev": {
+        "captainhook/captainhook": "^5.25",
         "friendsofphp/php-cs-fixer": "^3.50",
         "phpstan/phpstan": "^2.0.0",
         "phpstan/phpstan-phpunit": "^2.0.0",
@@ -53,6 +54,7 @@
         }
     },
     "scripts": {
+        "post-autoload-dump": "vendor/bin/captainhook install -f",
         "test": [
             "@php vendor/bin/phpunit"
         ],
