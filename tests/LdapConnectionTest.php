@@ -106,6 +106,41 @@ class LdapConnectionTest extends TestCase
         $this->assertEquals('Doelle', $entries[2]->getFirstAttributeValue('sn'));
     }
 
+    public function testGetEntriesWithSortTooManyResultsToSort(): void
+    {
+        $this->mockResults([
+            [
+                'cn' => ['janed'],
+                'givenName' => ['Jane'],
+                'sn' => ['Doelle'],
+            ],
+            [
+                'cn' => ['john88'],
+                'givenName' => ['John'],
+                'sn' => ['Doe'],
+            ],
+            [
+                'cn' => ['sm'],
+                'givenName' => ['Mario'],
+                'sn' => ['Super'],
+            ],
+            [
+                'cn' => ['wl'],
+                'givenName' => ['Wa'],
+                'sn' => ['Luigi'],
+            ],
+        ]);
+
+        try {
+            $options = [];
+            Options::setSort($options, new Sort([Sort::createSortField('cn', Sort::DESCENDING_DIRECTION)]));
+            $this->testLdapConnectionProvider->getConnection(TestLdapConnectionProvider::DEFAULT_CONNECTION_IDENTIFIER)->getEntries(options: $options);
+            $this->fail('LdapException not thrown as expected');
+        } catch (LdapException $ldapException) {
+            $this->assertEquals(LdapException::TOO_MANY_RESULTS_TO_SORT, $ldapException->getCode());
+        }
+    }
+
     /**
      * @throws FilterException
      */

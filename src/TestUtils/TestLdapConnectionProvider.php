@@ -27,6 +27,7 @@ class TestLdapConnectionProvider extends LdapConnectionProvider
                 Configuration::LDAP_PASSWORD_ATTRIBUTE => 'secret',
                 Configuration::LDAP_ENCRYPTION_ATTRIBUTE => 'start_tls',
                 Configuration::LDAP_OBJECT_CLASS_ATTRIBUTE => 'person',
+                Configuration::LDAP_NUM_RESULT_ITEMS_WILL_SORT_LIMIT_ATTRIBUTE => 3,
             ],
         ],
     ];

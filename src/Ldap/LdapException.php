@@ -11,4 +11,5 @@ class LdapException extends \RuntimeException
     public const USER_ATTRIBUTE_UNDEFINED = 3;
     public const LDAP_CONNECTION_UNDEFINED = 4;
     public const FILTER_INVALID = 5;
+    public const TOO_MANY_RESULTS_TO_SORT = 6;
 }

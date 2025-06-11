@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+* Add 'result_items_will_sort_limit' to LDAP config, i.e., the maximum number of items that will be sorted without throwing an error.
+  This is to prevent uncontrolled out-of-memory errors when sorting a large number of results sets. (default: 10 000)
+
 ## v0.2.12
 
 * Dependency cleanups

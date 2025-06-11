@@ -30,6 +30,10 @@ class Configuration implements ConfigurationInterface
     public const LDAP_ENCRYPTION_ATTRIBUTE = 'encryption';
     public const LDAP_OBJECT_CLASS_ATTRIBUTE = 'object_class';
     public const LDAP_CACHE_TTL_ATTRIBUTE = 'cache_ttl';
+    public const LDAP_NUM_RESULT_ITEMS_WILL_SORT_LIMIT_ATTRIBUTE = 'result_items_will_sort_limit';
+
+    /** @var int */
+    public const LDAP_NUM_RESULT_ITEMS_WILL_SORT_LIMIT_DEFAULT = 10000;
 
     public function getConfigTreeBuilder(): TreeBuilder
     {
@@ -118,6 +122,12 @@ class Configuration implements ConfigurationInterface
                         ->integerNode(self::LDAP_CACHE_TTL_ATTRIBUTE)
                           ->info('cache ttl. 0 indicates no caching.')
                           ->defaultValue(0)
+                        ->end()
+                        ->integerNode(self::LDAP_NUM_RESULT_ITEMS_WILL_SORT_LIMIT_ATTRIBUTE)
+                            ->info('The maximum number of items that will be sorted without throwing an error.'.
+                                'This is to prevent uncontrolled out of memory errors when sorting a large number of results sets. (default: '.
+                                self::LDAP_NUM_RESULT_ITEMS_WILL_SORT_LIMIT_DEFAULT.')')
+                            ->defaultValue(self::LDAP_NUM_RESULT_ITEMS_WILL_SORT_LIMIT_DEFAULT)
                         ->end()
                     ->end()
                 ->end()

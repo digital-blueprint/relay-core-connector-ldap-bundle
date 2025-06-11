@@ -34,6 +34,7 @@ class LdapConnection implements LoggerAwareInterface, LdapConnectionInterface
     private array $connectionConfig = [];
     private ?string $objectClass = null;
     protected ?Connection $connection = null;
+    private int $numResultItemsWillSort = Configuration::LDAP_NUM_RESULT_ITEMS_WILL_SORT_LIMIT_DEFAULT;
 
     public static function toLdapRecordConnectionConfig(array $config): array
     {
@@ -212,9 +213,11 @@ class LdapConnection implements LoggerAwareInterface, LdapConnectionInterface
 
             $sortFields = Options::getSort($options)?->getSortFields();
             if (!empty($sortFields)) {
-                // WORKAROUND: we do the sorting manually here, since we currently don't know if the LDAP server supports sorting.
                 // TODO: find a way to find out whether the LDAP server supports sorting
                 $allResults = $query->get();
+                if (count($allResults) > $this->numResultItemsWillSort) {
+                    throw new LdapException('Too many results to sort', LdapException::TOO_MANY_RESULTS_TO_SORT);
+                }
                 $allResults = $allResults->sortBy(array_map(
                     function ($sortField) {
                         return [Sort::getPath($sortField), Sort::getDirection($sortField) === Sort::ASCENDING_DIRECTION ? 'asc' : 'desc'];
@@ -326,6 +329,8 @@ class LdapConnection implements LoggerAwareInterface, LdapConnectionInterface
     {
         $this->objectClass =
             $config[Configuration::LDAP_OBJECT_CLASS_ATTRIBUTE] ?? 'person';
+        $this->numResultItemsWillSort = $config[Configuration::LDAP_NUM_RESULT_ITEMS_WILL_SORT_LIMIT_ATTRIBUTE] ??
+            Configuration::LDAP_NUM_RESULT_ITEMS_WILL_SORT_LIMIT_DEFAULT;
 
         $this->connectionConfig = self::toLdapRecordConnectionConfig($config);
     }
