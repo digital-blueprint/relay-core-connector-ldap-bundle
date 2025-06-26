@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## v0.2.15
+
 * Fix empty-test for string filter values
 
 ## v0.2.14
