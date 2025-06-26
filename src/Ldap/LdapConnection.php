@@ -54,6 +54,24 @@ class LdapConnection implements LoggerAwareInterface, LdapConnectionInterface
         return $connectionConfig;
     }
 
+    private static function assertIsNonEmptyArrayValue(mixed $value): void
+    {
+        if (false === is_array($value) || $value === []) {
+            throw new LdapException('filter condition operator "'.
+                FilterOperatorType::IN_ARRAY_OPERATOR.'" requires a non-empty array value',
+                LdapException::FILTER_INVALID);
+        }
+    }
+
+    private static function assertIsNonEmptyStringValue(mixed $value, string $filterOperatorType): void
+    {
+        if (false === is_string($value) || $value === '') {
+            throw new LdapException('filter condition operator "'.
+                $filterOperatorType.'" requires a non-empty string value',
+                LdapException::FILTER_INVALID);
+        }
+    }
+
     /**
      * @throws LdapException
      */
@@ -90,30 +108,18 @@ class LdapConnection implements LoggerAwareInterface, LdapConnectionInterface
             $value = $filterNode->getValue();
             switch ($filterNode->getOperator()) {
                 case FilterOperatorType::I_CONTAINS_OPERATOR:
-                    if (false === is_string($value) || empty($value)) {
-                        throw new LdapException('filter condition operator "'.
-                            FilterOperatorType::I_CONTAINS_OPERATOR.'" requires non-empty string value',
-                            LdapException::FILTER_INVALID);
-                    }
+                    self::assertIsNonEmptyStringValue($value, $filterNode->getOperator());
                     $queryBuilder->whereContains($field, $value);
                     break;
                 case FilterOperatorType::EQUALS_OPERATOR: // TODO: case-sensitivity post-precessing required
                     $queryBuilder->whereEquals($field, (string) $value);
                     break;
                 case FilterOperatorType::I_STARTS_WITH_OPERATOR:
-                    if (false === is_string($value) || empty($value)) {
-                        throw new LdapException('filter condition operator "'.
-                            FilterOperatorType::I_STARTS_WITH_OPERATOR.'" requires non-empty string value',
-                            LdapException::FILTER_INVALID);
-                    }
+                    self::assertIsNonEmptyStringValue($value, $filterNode->getOperator());
                     $queryBuilder->whereStartsWith($field, $value);
                     break;
                 case FilterOperatorType::I_ENDS_WITH_OPERATOR:
-                    if (false === is_string($value) || empty($value)) {
-                        throw new LdapException('filter condition operator "'.
-                        FilterOperatorType::I_ENDS_WITH_OPERATOR.'" requires non-empty string value',
-                            LdapException::FILTER_INVALID);
-                    }
+                    self::assertIsNonEmptyStringValue($value, $filterNode->getOperator());
                     $queryBuilder->whereEndsWith($field, $value);
                     break;
                 case FilterOperatorType::GREATER_THAN_OR_EQUAL_OPERATOR:
@@ -123,10 +129,7 @@ class LdapConnection implements LoggerAwareInterface, LdapConnectionInterface
                     $queryBuilder->where($field, $queryBuilder->getGrammar()->getOperators()['<='], $value);
                     break;
                 case FilterOperatorType::IN_ARRAY_OPERATOR:
-                    if (false === is_array($value) || empty($value)) {
-                        throw new LdapException('filter condition operator "'.FilterOperatorType::IN_ARRAY_OPERATOR.'" requires non-empty array value',
-                            LdapException::FILTER_INVALID);
-                    }
+                    self::assertIsNonEmptyArrayValue($value);
                     $queryBuilder->whereIn($field, $value);
                     break;
                 case FilterOperatorType::IS_NULL_OPERATOR:

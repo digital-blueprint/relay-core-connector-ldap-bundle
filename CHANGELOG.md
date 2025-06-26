@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+* Fix empty-test for string filter values
+
 ## v0.2.14
 
 * Pre-check filter values for correct types to avoid internal ldap library errors
