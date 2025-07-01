@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## v0.2.16
+
 * Update core and adapt
 
 ## v0.2.15
