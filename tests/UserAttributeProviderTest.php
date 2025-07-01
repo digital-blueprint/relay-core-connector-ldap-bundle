@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Dbp\Relay\CoreConnectorLdapBundle\Tests;
 
 use Dbp\Relay\CoreBundle\TestUtils\TestUserSession;
+use Dbp\Relay\CoreBundle\User\UserAttributeException;
 use Dbp\Relay\CoreConnectorLdapBundle\DependencyInjection\Configuration;
 use Dbp\Relay\CoreConnectorLdapBundle\Service\UserAttributeProvider;
 use Dbp\Relay\CoreConnectorLdapBundle\TestUtils\TestLdapConnectionProvider;
@@ -69,109 +70,108 @@ class UserAttributeProviderTest extends TestCase
         ];
     }
 
+    /**
+     * @throws UserAttributeException
+     */
     public function testAttributeMapping()
     {
         $this->setupUserAttributeProviderWithUser('money82');
         $this->mockResultsFor('money82');
-        $authzUserAttributes = $this->userAttributeProvider->getUserAttributes('money82');
-        $this->assertCount(3, $authzUserAttributes);
-        $this->assertEquals(['VIEWER', 'EDITOR'], $authzUserAttributes[self::ROLES_ATTRIBUTE]);
+        $this->assertEquals(['VIEWER', 'EDITOR'],
+            $this->userAttributeProvider->getUserAttribute('money82', self::ROLES_ATTRIBUTE));
 
         $this->setupUserAttributeProviderWithUser('penny80');
         $this->mockResultsFor('penny80');
-        $authzUserAttributes = $this->userAttributeProvider->getUserAttributes('penny80');
-        $this->assertCount(3, $authzUserAttributes);
-        $this->assertEquals(['VIEWER'], $authzUserAttributes[self::ROLES_ATTRIBUTE]);
+        $this->assertEquals(['VIEWER'], $this->userAttributeProvider->getUserAttribute('penny80', self::ROLES_ATTRIBUTE));
 
         $this->setupUserAttributeProviderWithUser('sunny85');
         $this->mockResultsFor('sunny85');
-        $authzUserAttributes = $this->userAttributeProvider->getUserAttributes('sunny85');
-        $this->assertCount(3, $authzUserAttributes);
-        $this->assertEquals([], $authzUserAttributes[self::ROLES_ATTRIBUTE]);
+        $this->assertEquals([], $this->userAttributeProvider->getUserAttribute('sunny85', self::ROLES_ATTRIBUTE));
     }
 
+    /**
+     * @throws UserAttributeException
+     */
     public function testCaching(): void
     {
         // without caching
         $this->setupUserAttributeProviderWithUser('money82');
         $this->mockResultsFor('money82');
-        $authzUserAttributes = $this->userAttributeProvider->getUserAttributes('money82');
+        $authzUserAttributes = $this->userAttributeProvider->getUserAttribute('money82', self::ROLES_ATTRIBUTE);
 
         $this->mockResultsFor('foo');
-        $authzUserAttributesCached = $this->userAttributeProvider->getUserAttributes('money82');
-        $this->assertNotSame($authzUserAttributes, $authzUserAttributesCached);
+        $authzUserAttributeCached = $this->userAttributeProvider->getUserAttribute('money82', self::ROLES_ATTRIBUTE);
+        $this->assertNotSame($authzUserAttributes, $authzUserAttributeCached);
 
         // with caching
         $this->userAttributeProvider->setCache(new ArrayAdapter());
         $this->mockResultsFor('money82');
-        $authzUserAttributes = $this->userAttributeProvider->getUserAttributes('money82');
-        $this->assertCount(3, $authzUserAttributes);
-        $this->assertEquals(['VIEWER', 'EDITOR'], $authzUserAttributes[self::ROLES_ATTRIBUTE]);
+        $authzUserAttribute = $this->userAttributeProvider->getUserAttribute('money82', self::ROLES_ATTRIBUTE);
+        $this->assertEquals(['VIEWER', 'EDITOR'], $authzUserAttribute);
 
         $this->mockResultsFor('foo');
         // no new LDAP request since user is found in cache
-        $authzUserAttributesCached = $this->userAttributeProvider->getUserAttributes('money82');
+        $authzUserAttributeCached = $this->userAttributeProvider->getUserAttribute('money82', self::ROLES_ATTRIBUTE);
 
-        $this->assertSame($authzUserAttributes, $authzUserAttributesCached);
+        $this->assertSame($authzUserAttributes, $authzUserAttributeCached);
     }
 
+    /**
+     * @throws UserAttributeException
+     */
     public function testDefaultValueLdapAttributeNotFound()
     {
         $this->setupUserAttributeProviderWithUser('honey90');
         $this->mockResultsFor('honey90');
-        $authzUserAttributes = $this->userAttributeProvider->getUserAttributes('honey90');
-
-        $this->assertCount(3, $authzUserAttributes);
-        $this->assertEquals(['DEFAULT'], $authzUserAttributes[self::ROLES_ATTRIBUTE]);
+        $this->assertEquals(['DEFAULT'], $this->userAttributeProvider->getUserAttribute('honey90', self::ROLES_ATTRIBUTE));
     }
 
+    /**
+     * @throws UserAttributeException
+     */
     public function testDefaultValueLdapAttributeNotMapped()
     {
         $this->setupUserAttributeProviderWithUser('money82');
         $this->mockResultsFor('money82');
-        $authzUserAttributes = $this->userAttributeProvider->getUserAttributes('money82');
-
-        $this->assertCount(3, $authzUserAttributes);
-        $this->assertArrayHasKey(self::MISC_ATTRIBUTE, $authzUserAttributes);
-        $misc = $authzUserAttributes[self::MISC_ATTRIBUTE];
-        $this->assertEquals(0, $misc);
-
-        $this->assertArrayHasKey(self::MISC_ARRAY_ATTRIBUTE, $authzUserAttributes);
-        $miscArray = $authzUserAttributes[self::MISC_ARRAY_ATTRIBUTE];
-        $this->assertEquals([1, 2, 3], $miscArray);
+        $this->userAttributeProvider->setCache(new ArrayAdapter());
+        $this->assertEquals(0, $this->userAttributeProvider->getUserAttribute('money82', self::MISC_ATTRIBUTE));
+        $this->assertEquals([1, 2, 3], $this->userAttributeProvider->getUserAttribute('money82', self::MISC_ARRAY_ATTRIBUTE));
     }
 
+    /**
+     * @throws UserAttributeException
+     */
     public function testWithoutUserId()
     {
         // expecting all default values
         $this->setupUserAttributeProviderWithUser();
-        $this->assertEquals([
-            self::ROLES_ATTRIBUTE => ['DEFAULT'],
-            self::MISC_ATTRIBUTE => 0,
-            self::MISC_ARRAY_ATTRIBUTE => [1, 2, 3],
-        ],
-            $this->userAttributeProvider->getUserAttributes(null));
+
+        $this->assertEquals(['DEFAULT'], $this->userAttributeProvider->getUserAttribute(null, self::ROLES_ATTRIBUTE));
+        $this->assertEquals(0, $this->userAttributeProvider->getUserAttribute(null, self::MISC_ATTRIBUTE));
+        $this->assertEquals([1, 2, 3], $this->userAttributeProvider->getUserAttribute(null, self::MISC_ARRAY_ATTRIBUTE));
     }
 
+    /**
+     * @throws UserAttributeException
+     */
     public function testUnauthenticated()
     {
         // this is allowed for debugging purposes
         $this->setupUserAttributeProviderWithUser(isAuthenticated: false);
         $this->mockResultsFor('money82');
-        $authzUserAttributes = $this->userAttributeProvider->getUserAttributes('money82');
-
-        $this->assertCount(3, $authzUserAttributes);
-        $this->assertEquals(['VIEWER', 'EDITOR'], $authzUserAttributes[self::ROLES_ATTRIBUTE]);
+        $this->assertEquals(['VIEWER', 'EDITOR'],
+            $this->userAttributeProvider->getUserAttribute('money82', self::ROLES_ATTRIBUTE));
     }
 
+    /**
+     * @throws UserAttributeException
+     */
     public function testUserIdentifierMismatch()
     {
         // it's allowed to request attributes for users other than the logged-in user
         $this->setupUserAttributeProviderWithUser('foo');
         $this->mockResultsFor('money82');
-        $authzUserAttributes = $this->userAttributeProvider->getUserAttributes('money82');
-        $this->assertCount(3, $authzUserAttributes);
-        $this->assertEquals(['VIEWER', 'EDITOR'], $authzUserAttributes[self::ROLES_ATTRIBUTE]);
+        $this->assertEquals(['VIEWER', 'EDITOR'], $this->userAttributeProvider->getUserAttribute('money82', self::ROLES_ATTRIBUTE));
     }
 
     public function testUserNotFound()
@@ -179,13 +179,9 @@ class UserAttributeProviderTest extends TestCase
         $this->setupUserAttributeProviderWithUser('foo');
         $this->mockResultsFor();
         // expecting all default values
-        $this->setupUserAttributeProviderWithUser();
-        $this->assertEquals([
-            self::ROLES_ATTRIBUTE => ['DEFAULT'],
-            self::MISC_ATTRIBUTE => 0,
-            self::MISC_ARRAY_ATTRIBUTE => [1, 2, 3],
-        ],
-            $this->userAttributeProvider->getUserAttributes('foo'));
+        $this->assertEquals(['DEFAULT'], $this->userAttributeProvider->getUserAttribute('foo', self::ROLES_ATTRIBUTE));
+        $this->assertEquals(0, $this->userAttributeProvider->getUserAttribute('foo', self::MISC_ATTRIBUTE));
+        $this->assertEquals([1, 2, 3], $this->userAttributeProvider->getUserAttribute('foo', self::MISC_ARRAY_ATTRIBUTE));
     }
 
     public function testMultipleAttributeDeclarationsException()

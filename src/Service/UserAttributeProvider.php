@@ -6,7 +6,7 @@ namespace Dbp\Relay\CoreConnectorLdapBundle\Service;
 
 use Dbp\Relay\CoreBundle\API\UserSessionInterface;
 use Dbp\Relay\CoreBundle\Exception\ApiError;
-use Dbp\Relay\CoreBundle\Helpers\Tools;
+use Dbp\Relay\CoreBundle\User\UserAttributeException;
 use Dbp\Relay\CoreBundle\User\UserAttributeProviderInterface;
 use Dbp\Relay\CoreConnectorLdapBundle\DependencyInjection\Configuration;
 use Dbp\Relay\CoreConnectorLdapBundle\Ldap\LdapConnectionProvider;
@@ -44,16 +44,20 @@ class UserAttributeProvider implements UserAttributeProviderInterface
         $this->userCache = $cachePool;
     }
 
-    public function getAvailableAttributes(): array
+    public function hasUserAttribute(string $name): bool
     {
-        return array_keys($this->availableAttributes);
+        return array_key_exists($name, $this->availableAttributes);
     }
 
-    public function getUserAttributes(?string $userIdentifier): array
+    public function getUserAttribute(?string $userIdentifier, string $name): mixed
     {
-        $userAttributes = null;
+        if (false === array_key_exists($name, $this->availableAttributes)) {
+            throw new UserAttributeException("user attribute '$name' undefined", UserAttributeException::USER_ATTRIBUTE_UNDEFINED);
+        }
 
-        if (Tools::isNullOrEmpty($userIdentifier) === false) {
+        if ($userIdentifier === null) {
+            $value = $this->availableAttributes[$name][self::DEFAULT_VALUE_KEY];
+        } else {
             $userCacheItem = null;
             if ($this->userSession->isAuthenticated() // non-authenticated is allowed for debug command
                 && ($userCacheItem = $this->userCache?->getItem($this->userSession->getSessionCacheKey().'-'.$userIdentifier))
@@ -67,12 +71,10 @@ class UserAttributeProvider implements UserAttributeProviderInterface
                     $this->userCache->save($userCacheItem);
                 }
             }
+            $value = $userAttributes[$name];
         }
 
-        return $userAttributes ?? array_map(
-            function ($attributeData) {
-                return $attributeData[self::DEFAULT_VALUE_KEY];
-            }, $this->availableAttributes);
+        return $value;
     }
 
     /*
