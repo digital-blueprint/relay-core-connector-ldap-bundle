@@ -104,7 +104,7 @@ class LdapConnection implements LoggerAwareInterface, LdapConnectionInterface
                     throw new LdapException('invalid filter node type: '.$filterNode->getNodeType(), LdapException::FILTER_INVALID);
             }
         } elseif ($filterNode instanceof ConditionFilterNode) {
-            $field = $filterNode->getField();
+            $field = $filterNode->getPath();
             $value = $filterNode->getValue();
             switch ($filterNode->getOperator()) {
                 case FilterOperatorType::I_CONTAINS_OPERATOR:
