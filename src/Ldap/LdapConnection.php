@@ -80,25 +80,37 @@ class LdapConnection implements LoggerAwareInterface, LdapConnectionInterface
         if ($filterNode instanceof LogicalFilterNode) {
             switch ($filterNode->getNodeType()) {
                 case FilterNodeType::AND:
-                    $queryBuilder->andFilter(function (Builder $builder) use ($filterNode) {
-                        foreach ($filterNode->getChildren() as $childNodeDefinition) {
-                            self::addFilterToQuery($builder, $childNodeDefinition);
-                        }
-                    });
+                    if (($numChildren = count($filterNode->getChildren())) > 1) {
+                        $queryBuilder->andFilter(function (Builder $builder) use ($filterNode) {
+                            foreach ($filterNode->getChildren() as $childNodeDefinition) {
+                                self::addFilterToQuery($builder, $childNodeDefinition);
+                            }
+                        });
+                    } elseif ($numChildren === 1) {
+                        self::addFilterToQuery($queryBuilder, $filterNode->getChildren()[0]);
+                    }
                     break;
                 case FilterNodeType::OR:
-                    $queryBuilder->orFilter(function (Builder $builder) use ($filterNode) {
-                        foreach ($filterNode->getChildren() as $childNodeDefinition) {
-                            self::addFilterToQuery($builder, $childNodeDefinition);
-                        }
-                    });
+                    if (($numChildren = count($filterNode->getChildren())) > 1) {
+                        $queryBuilder->orFilter(function (Builder $builder) use ($filterNode) {
+                            foreach ($filterNode->getChildren() as $childNodeDefinition) {
+                                self::addFilterToQuery($builder, $childNodeDefinition);
+                            }
+                        });
+                    } elseif ($numChildren === 1) {
+                        self::addFilterToQuery($queryBuilder, $filterNode->getChildren()[0]);
+                    }
                     break;
                 case FilterNodeType::NOT:
-                    $queryBuilder->notFilter(function (Builder $builder) use ($filterNode) {
-                        foreach ($filterNode->getChildren() as $childNodeDefinition) {
-                            self::addFilterToQuery($builder, $childNodeDefinition);
-                        }
-                    });
+                    if (count($filterNode->getChildren()) === 1) {
+                        $queryBuilder->notFilter(function (Builder $builder) use ($filterNode) {
+                            foreach ($filterNode->getChildren() as $childNodeDefinition) {
+                                self::addFilterToQuery($builder, $childNodeDefinition);
+                            }
+                        });
+                    } else {
+                        throw new LdapException('invalid filter: NOT nodes may only have exactly one child node', LdapException::FILTER_INVALID);
+                    }
                     break;
                 default:
                     throw new LdapException('invalid filter node type: '.$filterNode->getNodeType(), LdapException::FILTER_INVALID);

@@ -200,7 +200,7 @@ class LdapConnectionTest extends TestCase
 
     public function testGetEntryNotFound(): void
     {
-        $this->mockResults([]);
+        $this->mockResults([], 'janed');
         try {
             $this->testLdapConnectionProvider->getConnection(TestLdapConnectionProvider::DEFAULT_CONNECTION_IDENTIFIER)->getEntryByAttribute('cn', 'janed');
             $this->fail('exception not thrown as expected');
@@ -217,15 +217,15 @@ class LdapConnectionTest extends TestCase
                 'givenName' => ['Jane'],
                 'sn' => ['Doelle'],
             ],
-        ]);
+        ], 'janed');
         $entry = $this->testLdapConnectionProvider->getConnection(TestLdapConnectionProvider::DEFAULT_CONNECTION_IDENTIFIER)->getEntryByAttribute('cn', 'janed');
         $this->assertEquals('janed', $entry->getFirstAttributeValue('cn'));
         $this->assertEquals('Jane', $entry->getFirstAttributeValue('givenName'));
         $this->assertEquals('Doelle', $entry->getFirstAttributeValue('sn'));
     }
 
-    private function mockResults(array $results): void
+    private function mockResults(array $results, ?string $expectCn = null): void
     {
-        $this->testLdapConnectionProvider->mockResults($results);
+        $this->testLdapConnectionProvider->mockResults($results, $expectCn);
     }
 }
