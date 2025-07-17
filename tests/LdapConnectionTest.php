@@ -28,14 +28,14 @@ class LdapConnectionTest extends TestCase
 
     public function testGetEntriesEmpty(): void
     {
-        $this->mockResults([]);
+        $this->testLdapConnectionProvider->mockResults([]);
         $this->assertEmpty($this->testLdapConnectionProvider->getConnection(
             TestLdapConnectionProvider::DEFAULT_CONNECTION_IDENTIFIER)->getEntries());
     }
 
     public function testGetEntries(): void
     {
-        $this->mockResults([
+        $this->testLdapConnectionProvider->mockResults([
             [
                 'cn' => ['john88'],
                 'givenName' => ['John'],
@@ -70,7 +70,7 @@ class LdapConnectionTest extends TestCase
 
     public function testGetEntriesWithSort(): void
     {
-        $this->mockResults([
+        $this->testLdapConnectionProvider->mockResults([
             [
                 'cn' => ['janed'],
                 'givenName' => ['Jane'],
@@ -108,7 +108,7 @@ class LdapConnectionTest extends TestCase
 
     public function testGetEntriesWithSortTooManyResultsToSort(): void
     {
-        $this->mockResults([
+        $this->testLdapConnectionProvider->mockResults([
             [
                 'cn' => ['janed'],
                 'givenName' => ['Jane'],
@@ -146,13 +146,17 @@ class LdapConnectionTest extends TestCase
      */
     public function testGetEntriesWithFilter(): void
     {
-        $this->mockResults([
+        $this->testLdapConnectionProvider->mockResults([
             [
                 'cn' => ['sm'],
                 'givenName' => ['Mario'],
                 'sn' => ['Super'],
             ],
-        ]);
+        ], isQueryAsExpected: function (string $query) {
+            return $query ===
+                '(&('.TestLdapConnectionProvider::getObjectClassCriteria().')'.
+                '(givenName=*'.TestLdapConnectionProvider::toExpectedValue('rio').'*))';
+        });
 
         $options = [];
         Options::addFilter($options,
@@ -200,7 +204,7 @@ class LdapConnectionTest extends TestCase
 
     public function testGetEntryNotFound(): void
     {
-        $this->mockResults([], 'janed');
+        $this->testLdapConnectionProvider->mockResults([], 'janed');
         try {
             $this->testLdapConnectionProvider->getConnection(TestLdapConnectionProvider::DEFAULT_CONNECTION_IDENTIFIER)->getEntryByAttribute('cn', 'janed');
             $this->fail('exception not thrown as expected');
@@ -211,7 +215,7 @@ class LdapConnectionTest extends TestCase
 
     public function testGetEntry(): void
     {
-        $this->mockResults([
+        $this->testLdapConnectionProvider->mockResults([
             [
                 'cn' => ['janed'],
                 'givenName' => ['Jane'],
@@ -222,10 +226,5 @@ class LdapConnectionTest extends TestCase
         $this->assertEquals('janed', $entry->getFirstAttributeValue('cn'));
         $this->assertEquals('Jane', $entry->getFirstAttributeValue('givenName'));
         $this->assertEquals('Doelle', $entry->getFirstAttributeValue('sn'));
-    }
-
-    private function mockResults(array $results, ?string $expectCn = null): void
-    {
-        $this->testLdapConnectionProvider->mockResults($results, $expectCn);
     }
 }
