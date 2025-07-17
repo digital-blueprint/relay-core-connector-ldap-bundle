@@ -5,6 +5,10 @@ services:
     calls:
       - setCache: [ '@dbp.relay.core_connector_ldap.cache.user' ]
 
+  Dbp\Relay\CoreConnectorLdapBundle\Service\AuthorizationService:
+    autowire: true
+    autoconfigure: true
+
   Dbp\Relay\CoreConnectorLdapBundle\Ldap\LdapConnectionProvider:
     autowire: true
     autoconfigure: true

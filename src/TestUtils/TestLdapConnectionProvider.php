@@ -34,6 +34,8 @@ class TestLdapConnectionProvider extends LdapConnectionProvider
 
     public static function create(): TestLdapConnectionProvider
     {
+        Container::getInstance()->flush();
+
         $provider = new TestLdapConnectionProvider();
         $provider->setConfig(self::DEFAULT_CONFIG);
 
@@ -45,13 +47,27 @@ class TestLdapConnectionProvider extends LdapConnectionProvider
         $container->set(LdapConnectionProvider::class, $this);
     }
 
-    public function mockResults(array $results = [], string $mockConnectionIdentifier = self::DEFAULT_CONNECTION_IDENTIFIER): void
+    public function mockResults(array $results = [], ?string $expectCn = null, string $expectObjectClass = 'person',
+        string $mockConnectionIdentifier = self::DEFAULT_CONNECTION_IDENTIFIER): void
     {
-        $this->cleanup();
+        $ldapExpectation = LdapFake::operation('search')
+            ->once()
+            ->andReturn($results);
+
+        if ($expectCn !== null) {
+            $expectCnOctal = self::convertStringToOctal($expectCn);
+            $expectObjectClassOctal = self::convertStringToOctal($expectObjectClass);
+            $expectQuery = "(&(objectClass=$expectObjectClassOctal)(cn=$expectCnOctal))";
+            $ldapExpectation->with('dc=example,dc=com', $expectQuery);
+        }
+
         $this->getFakeLdap($mockConnectionIdentifier)
-            ->expect(
-                LdapFake::operation('search')->andReturn($results)
-            );
+            ->expect($ldapExpectation);
+    }
+
+    public function expectConnection(string $mockConnectionIdentifier = self::DEFAULT_CONNECTION_IDENTIFIER): void
+    {
+        $this->getFakeLdap($mockConnectionIdentifier);
     }
 
     public function getConnection(string $connectionIdentifier): LdapConnectionInterface
@@ -77,7 +93,7 @@ class TestLdapConnectionProvider extends LdapConnectionProvider
         }
     }
 
-    public function cleanup(): void
+    public function tearDown(): void
     {
         DirectoryFake::tearDown();
     }
@@ -93,5 +109,15 @@ class TestLdapConnectionProvider extends LdapConnectionProvider
         assert($ldap instanceof LdapFake);
 
         return $ldap;
+    }
+
+    private static function convertStringToOctal(string $input): string
+    {
+        $output = '';
+        foreach (str_split($input) as $char) {
+            $output .= '\\'.dechex(ord($char));
+        }
+
+        return $output;
     }
 }

@@ -23,7 +23,7 @@ class LdapConnectionTest extends TestCase
 
     protected function tearDown(): void
     {
-        $this->testLdapConnectionProvider->cleanup();
+        $this->testLdapConnectionProvider->tearDown();
     }
 
     public function testGetEntriesEmpty(): void
@@ -169,8 +169,6 @@ class LdapConnectionTest extends TestCase
 
     public function testGetEntriesWithInvalidFilter(): void
     {
-        $this->mockResults([]);
-
         $options = [];
         Options::addFilter($options,
             FilterTreeBuilder::create()
@@ -178,7 +176,9 @@ class LdapConnectionTest extends TestCase
                 ->createFilter());
 
         try {
-            $this->testLdapConnectionProvider->getConnection(TestLdapConnectionProvider::DEFAULT_CONNECTION_IDENTIFIER)->getEntries(options: $options);
+            $this->testLdapConnectionProvider->expectConnection();
+            $this->testLdapConnectionProvider->getConnection(
+                TestLdapConnectionProvider::DEFAULT_CONNECTION_IDENTIFIER)->getEntries(options: $options);
             $this->fail('exception not thrown as expected');
         } catch (LdapException $ldapException) {
             $this->assertEquals(LdapException::FILTER_INVALID, $ldapException->getCode());

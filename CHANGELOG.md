@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- Make user identifier to use for the user attribute lookup configurable by an authorization attribute expression
+(`current_ldap_user_identifier_expression`)
+- Enhance test tools, allowing to expect a requested `cn` value and `objectClass`
+
 ## v0.2.17
 
 - Update core and adapt

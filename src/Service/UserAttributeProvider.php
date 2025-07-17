@@ -30,7 +30,8 @@ class UserAttributeProvider implements UserAttributeProviderInterface
 
     public function __construct(
         private readonly LdapConnectionProvider $ldapConnectionProvider,
-        private readonly UserSessionInterface $userSession)
+        private readonly UserSessionInterface $userSession,
+        private readonly AuthorizationService $authorizationService)
     {
     }
 
@@ -55,16 +56,17 @@ class UserAttributeProvider implements UserAttributeProviderInterface
             throw new UserAttributeException("user attribute '$name' undefined", UserAttributeException::USER_ATTRIBUTE_UNDEFINED);
         }
 
-        if ($userIdentifier === null) {
+        $currentLdapUserIdentifier = $this->authorizationService->getCurrentLdapUserIdentifier();
+        if ($currentLdapUserIdentifier === null) {
             $value = $this->availableAttributes[$name][self::DEFAULT_VALUE_KEY];
         } else {
             $userCacheItem = null;
             if ($this->userSession->isAuthenticated() // non-authenticated is allowed for debug command
-                && ($userCacheItem = $this->userCache?->getItem($this->userSession->getSessionCacheKey().'-'.$userIdentifier))
+                && ($userCacheItem = $this->userCache?->getItem($this->userSession->getSessionCacheKey().'-'.$currentLdapUserIdentifier))
                 && $userCacheItem->isHit()) {
                 $userAttributes = $userCacheItem->get();
             } else {
-                $userAttributes = $this->getUserDataFromLdap($userIdentifier);
+                $userAttributes = $this->getUserDataFromLdap($currentLdapUserIdentifier);
                 if ($userCacheItem) {
                     $userCacheItem->set($userAttributes);
                     $userCacheItem->expiresAfter($this->userSession->getSessionTTL() + 1);
@@ -80,12 +82,12 @@ class UserAttributeProvider implements UserAttributeProviderInterface
     /*
      * @throws ApiError
      */
-    private function getUserDataFromLdap(string $userIdentifier): array
+    private function getUserDataFromLdap(string $ldapUserIdentifier): array
     {
         $ldapEntry = null;
         try {
             $ldapEntry = $this->ldapConnectionProvider->getConnection($this->ldapConnectionIdentifier)
-                ->getEntryByAttribute($this->ldapUserIdentifierAttribute, $userIdentifier);
+                ->getEntryByAttribute($this->ldapUserIdentifierAttribute, $ldapUserIdentifier);
         } catch (LdapException $exception) {
             if ($exception->getCode() !== LdapException::ENTRY_NOT_FOUND) {
                 throw match ($exception->getCode()) {
@@ -93,7 +95,7 @@ class UserAttributeProvider implements UserAttributeProviderInterface
                         'failed to connect to LDAP server'),
                     default => new \RuntimeException(
                         sprintf('failed to get user data from LDAP for user \'%s\': \'%s\' (code: %d)',
-                            $userIdentifier, $exception->getMessage(), $exception->getCode())),
+                            $ldapUserIdentifier, $exception->getMessage(), $exception->getCode())),
                 };
             }
         }
@@ -121,22 +123,22 @@ class UserAttributeProvider implements UserAttributeProviderInterface
      */
     private function loadConfig(array $config): void
     {
-        $this->ldapConnectionIdentifier = $config[Configuration::LDAP_CONNECTION_ATTRIBUTE];
-        $this->ldapUserIdentifierAttribute = $config[Configuration::LDAP_USER_IDENTIFIER_ATTRIBUTE_ATTRIBUTE] ?? 'cn';
+        $this->ldapConnectionIdentifier = $config[Configuration::USER_ATTRIBUTE_LDAP_CONNECTION_ATTRIBUTE];
+        $this->ldapUserIdentifierAttribute = $config[Configuration::USER_ATTRIBUTE_LDAP_USER_IDENTIFIER_ATTRIBUTE_ATTRIBUTE] ?? 'cn';
 
         $this->availableAttributes = [];
-        foreach ($config[Configuration::ATTRIBUTES_ATTRIBUTE] as $attribute) {
-            $attributeName = $attribute[Configuration::NAME_ATTRIBUTE];
+        foreach ($config[Configuration::USER_ATTRIBUTE_ATTRIBUTES_ATTRIBUTE] as $attribute) {
+            $attributeName = $attribute[Configuration::USER_ATTRIBUTE_NAME_ATTRIBUTE];
             if (isset($this->availableAttributes[$attributeName])) {
                 throw new \RuntimeException(sprintf('multiple declaration of attribute \'%s\'', $attributeName));
             }
 
             $this->availableAttributes[$attributeName] = [
-                self::IS_ARRAY_KEY => $attribute[Configuration::IS_ARRAY_ATTRIBUTE],
-                self::DEFAULT_VALUE_KEY => $attribute[Configuration::IS_ARRAY_ATTRIBUTE] ?
-                    $attribute[Configuration::DEFAULT_VALUES_ATTRIBUTE] ?? [] :
-                    $attribute[Configuration::DEFAULT_VALUE_ATTRIBUTE] ?? null,
-                self::LDAP_ATTRIBUTE_KEY => $attribute[Configuration::LDAP_ATTRIBUTE_ATTRIBUTE] ?? null,
+                self::IS_ARRAY_KEY => $attribute[Configuration::USER_ATTRIBUTE_IS_ARRAY_ATTRIBUTE],
+                self::DEFAULT_VALUE_KEY => $attribute[Configuration::USER_ATTRIBUTE_IS_ARRAY_ATTRIBUTE] ?
+                    $attribute[Configuration::USER_ATTRIBUTE_DEFAULT_VALUES_ATTRIBUTE] ?? [] :
+                    $attribute[Configuration::USER_ATTRIBUTE_DEFAULT_VALUE_ATTRIBUTE] ?? null,
+                self::LDAP_ATTRIBUTE_KEY => $attribute[Configuration::USER_ATTRIBUTE_LDAP_ATTRIBUTE_ATTRIBUTE] ?? null,
             ];
         }
     }

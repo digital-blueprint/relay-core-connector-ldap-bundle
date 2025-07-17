@@ -282,7 +282,7 @@ class LdapConnection implements LoggerAwareInterface, LdapConnectionInterface
      * @throws BindException
      * @throws ConfigurationException
      */
-    private function connect(): Connection
+    private function getConnectionInternal(): Connection
     {
         if ($this->connection === null) {
             if ($this->logger !== null) {
@@ -295,7 +295,7 @@ class LdapConnection implements LoggerAwareInterface, LdapConnectionInterface
             $this->connection = $connection;
         }
 
-        if (!$this->connection->isConnected()) {
+        if (false === $this->connection->isConnected()) {
             $this->connection->connect();
         }
 
@@ -315,7 +315,7 @@ class LdapConnection implements LoggerAwareInterface, LdapConnectionInterface
             throw new \RuntimeException($exception->getMessage());
         }
 
-        return $this->connect()->query()->cache($until);
+        return $this->getConnectionInternal()->query()->cache($until);
     }
 
     /*
@@ -361,7 +361,7 @@ class LdapConnection implements LoggerAwareInterface, LdapConnectionInterface
     /**
      * For testing purposes only.
      */
-    public function getConnection(): Connection
+    public function getConnection(): ?Connection
     {
         return $this->connection;
     }
