@@ -2,11 +2,11 @@
 
 ## Unreleased
 
-- Make user identifier to use for the user attribute lookup configurable by an authorization attribute expression
+- Make the user identifier which is used for the user attribute lookup configurable by an authorization attribute expression
 (`current_ldap_user_identifier_expression`)
 - Enhance test tools, allowing to expect a requested `cn` value or pass a callback function to check if the query
 is as expected
-- simplify filters being passed to LDAP
+- simplify filter tree being passed to LDAP
 
 ## v0.2.17
 

@@ -164,7 +164,8 @@ class LdapConnectionTest extends TestCase
                 ->iContains('givenName', 'rio')
                 ->createFilter());
 
-        $entries = $this->testLdapConnectionProvider->getConnection(TestLdapConnectionProvider::DEFAULT_CONNECTION_IDENTIFIER)->getEntries(options: $options);
+        $entries = $this->testLdapConnectionProvider->getConnection(
+            TestLdapConnectionProvider::DEFAULT_CONNECTION_IDENTIFIER)->getEntries(options: $options);
         $this->assertCount(1, $entries);
         $this->assertEquals('sm', $entries[0]->getFirstAttributeValue('cn'));
         $this->assertEquals('Mario', $entries[0]->getFirstAttributeValue('givenName'));

@@ -13,6 +13,7 @@ use LdapRecord\Container;
 use LdapRecord\Testing\ConnectionFake;
 use LdapRecord\Testing\DirectoryFake;
 use LdapRecord\Testing\LdapFake;
+use Symfony\Component\DependencyInjection\Container as ServiceContainer;
 
 class TestLdapConnectionProvider extends LdapConnectionProvider
 {
@@ -63,7 +64,7 @@ class TestLdapConnectionProvider extends LdapConnectionProvider
         return 'objectClass='.self::toExpectedValue(self::OBJECT_CLASS);
     }
 
-    public function useInApiTest(\Symfony\Component\DependencyInjection\Container $container): void
+    public function useInApiTest(ServiceContainer $container): void
     {
         $container->set(LdapConnectionProvider::class, $this);
     }
