@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## v0.2.18
+
 - Fix pagination when no sorting is applied
 - Make the user identifier which is used for the user attribute lookup configurable by an authorization attribute expression
 (`current_ldap_user_identifier_expression`)
