@@ -242,9 +242,8 @@ class LdapConnection implements LoggerAwareInterface, LdapConnectionInterface
             }
 
             $sortFields = Options::getSort($options)?->getSortFields();
-            if (!empty($sortFields)) {
-                // TODO: find a way to find out whether the LDAP server supports sorting
-                $allResults = $query->get();
+            if (false === empty($sortFields)) {
+                $allResults = $query->get(); // even this is likely to exhaust memory for large result sets
                 if (count($allResults) > $this->numResultItemsWillSort) {
                     throw new LdapException('Too many results to sort', LdapException::TOO_MANY_RESULTS_TO_SORT);
                 }
@@ -252,13 +251,22 @@ class LdapConnection implements LoggerAwareInterface, LdapConnectionInterface
                     function ($sortField) {
                         return [Sort::getPath($sortField), Sort::getDirection($sortField) === Sort::ASCENDING_DIRECTION ? 'asc' : 'desc'];
                     }, $sortFields));
-                $results = $allResults->forPage($currentPageNumber, $maxNumItemsPerPage);
+                $resultEntries = $allResults->forPage($currentPageNumber, $maxNumItemsPerPage);
             } else {
-                $results = $query->forPage($currentPageNumber, $maxNumItemsPerPage);
+                $resultEntries = [];
+                $query->chunk($maxNumItemsPerPage,
+                    function (iterable $chunkEntries, int $currentChunkNumber) use ($currentPageNumber, &$resultEntries) {
+                        $done = $currentChunkNumber === $currentPageNumber;
+                        if ($done) {
+                            $resultEntries = $chunkEntries;
+                        }
+
+                        return false === $done;
+                    });
             }
 
             $entries = [];
-            foreach ($results as $entry) {
+            foreach ($resultEntries as $entry) {
                 $entries[] = new LdapEntry($entry);
             }
 

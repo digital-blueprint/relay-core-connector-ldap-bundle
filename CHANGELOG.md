@@ -2,6 +2,7 @@
 
 ## Unreleased
 
+- Fix pagination when no sorting is applied
 - Make the user identifier which is used for the user attribute lookup configurable by an authorization attribute expression
 (`current_ldap_user_identifier_expression`)
 - Enhance test tools, allowing to expect a requested `cn` value or pass a callback function to check if the query
