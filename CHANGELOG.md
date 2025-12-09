@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+## v0.2.20
+
+- Add support for Symfony 7.4
+
 ## v0.2.19
 
 - Fix pagination when no sorting is applied
