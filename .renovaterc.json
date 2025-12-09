@@ -14,11 +14,7 @@
   "packageRules": [
     {
       "matchPackagePrefixes": ["symfony/"],
-      "allowedVersions": "<7"
-    },
-    {
-      "matchPackageNames": ["phpunit/phpunit"],
-      "allowedVersions": "<11"
+      "allowedVersions": "<8"
     }
   ]
 }
