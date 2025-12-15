@@ -347,7 +347,7 @@ class LdapConnection implements LoggerAwareInterface, LdapConnectionInterface
     private function getEntry(string $attributeName, string $attributeValue): LdapEntryInterface
     {
         try {
-            $entry = new ModelBuilder(new User(), $this->getCachedQueryBuilder())
+            $entry = (new ModelBuilder(new User(), $this->getCachedQueryBuilder()))
                 ->whereEquals('objectClass', $this->objectClass)
                 ->whereEquals($attributeName, $attributeValue)
                 ->first();
