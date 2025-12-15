@@ -77,35 +77,35 @@ class LdapConnection implements LoggerAwareInterface, LdapConnectionInterface
     /**
      * @throws LdapException
      */
-    public static function addFilterToQuery(QueryBuilder $queryBuilder, FilterNode $filterNode): void
+    public static function addFilterToQuery(ModelBuilder $modelBuilder, FilterNode $filterNode): void
     {
         if ($filterNode instanceof LogicalFilterNode) {
             switch ($filterNode->getNodeType()) {
                 case FilterNodeType::AND:
                     if (($numChildren = count($filterNode->getChildren())) > 1) {
-                        $queryBuilder->andFilter(function (QueryBuilder $builder) use ($filterNode) {
+                        $modelBuilder->andFilter(function (ModelBuilder $builder) use ($filterNode) {
                             foreach ($filterNode->getChildren() as $childNodeDefinition) {
                                 self::addFilterToQuery($builder, $childNodeDefinition);
                             }
                         });
                     } elseif ($numChildren === 1) {
-                        self::addFilterToQuery($queryBuilder, $filterNode->getChildren()[0]);
+                        self::addFilterToQuery($modelBuilder, $filterNode->getChildren()[0]);
                     }
                     break;
                 case FilterNodeType::OR:
                     if (($numChildren = count($filterNode->getChildren())) > 1) {
-                        $queryBuilder->orFilter(function (QueryBuilder $builder) use ($filterNode) {
+                        $modelBuilder->orFilter(function (ModelBuilder $builder) use ($filterNode) {
                             foreach ($filterNode->getChildren() as $childNodeDefinition) {
                                 self::addFilterToQuery($builder, $childNodeDefinition);
                             }
                         });
                     } elseif ($numChildren === 1) {
-                        self::addFilterToQuery($queryBuilder, $filterNode->getChildren()[0]);
+                        self::addFilterToQuery($modelBuilder, $filterNode->getChildren()[0]);
                     }
                     break;
                 case FilterNodeType::NOT:
                     if (count($filterNode->getChildren()) === 1) {
-                        $queryBuilder->notFilter(function (QueryBuilder $builder) use ($filterNode) {
+                        $modelBuilder->notFilter(function (ModelBuilder $builder) use ($filterNode) {
                             foreach ($filterNode->getChildren() as $childNodeDefinition) {
                                 self::addFilterToQuery($builder, $childNodeDefinition);
                             }
@@ -123,31 +123,31 @@ class LdapConnection implements LoggerAwareInterface, LdapConnectionInterface
             switch ($filterNode->getOperator()) {
                 case FilterOperatorType::I_CONTAINS_OPERATOR:
                     self::assertIsNonEmptyStringValue($value, $filterNode->getOperator());
-                    $queryBuilder->whereContains($field, $value);
+                    $modelBuilder->whereContains($field, $value);
                     break;
                 case FilterOperatorType::EQUALS_OPERATOR: // TODO: case-sensitivity post-precessing required
-                    $queryBuilder->whereEquals($field, (string) $value);
+                    $modelBuilder->whereEquals($field, (string) $value);
                     break;
                 case FilterOperatorType::I_STARTS_WITH_OPERATOR:
                     self::assertIsNonEmptyStringValue($value, $filterNode->getOperator());
-                    $queryBuilder->whereStartsWith($field, $value);
+                    $modelBuilder->whereStartsWith($field, $value);
                     break;
                 case FilterOperatorType::I_ENDS_WITH_OPERATOR:
                     self::assertIsNonEmptyStringValue($value, $filterNode->getOperator());
-                    $queryBuilder->whereEndsWith($field, $value);
+                    $modelBuilder->whereEndsWith($field, $value);
                     break;
                 case FilterOperatorType::GREATER_THAN_OR_EQUAL_OPERATOR:
-                    $queryBuilder->where($field, '>=', $value);
+                    $modelBuilder->where($field, '>=', $value);
                     break;
                 case FilterOperatorType::LESS_THAN_OR_EQUAL_OPERATOR:
-                    $queryBuilder->where($field, '<=', $value);
+                    $modelBuilder->where($field, '<=', $value);
                     break;
                 case FilterOperatorType::IN_ARRAY_OPERATOR:
                     self::assertIsNonEmptyArrayValue($value);
-                    $queryBuilder->whereIn($field, $value);
+                    $modelBuilder->whereIn($field, $value);
                     break;
                 case FilterOperatorType::IS_NULL_OPERATOR:
-                    $queryBuilder->whereHas($field);
+                    $modelBuilder->whereHas($field);
                     break;
                 default:
                     throw new LdapException('unsupported filter condition operator: '.$filterNode->getOperator(),
@@ -235,11 +235,10 @@ class LdapConnection implements LoggerAwareInterface, LdapConnectionInterface
     protected function getEntriesInternal(int $currentPageNumber, int $maxNumItemsPerPage, array $options = []): array
     {
         try {
-            $queryBuilder = $this->getCachedQueryBuilder()->whereEquals('objectClass', $this->objectClass);
-            $query = new ModelBuilder(new User(), $queryBuilder);
+            $query = (new ModelBuilder(new User(), $this->getCachedQueryBuilder()))->whereEquals('objectClass', $this->objectClass);
 
             if ($filter = Options::getFilter($options)) {
-                self::addFilterToQuery($queryBuilder, $filter->getRootNode());
+                self::addFilterToQuery($query, $filter->getRootNode());
             }
 
             $sortFields = Options::getSort($options)?->getSortFields();
