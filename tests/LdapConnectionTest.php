@@ -8,8 +8,11 @@ use Dbp\Relay\CoreBundle\Rest\Options;
 use Dbp\Relay\CoreBundle\Rest\Query\Filter\FilterException;
 use Dbp\Relay\CoreBundle\Rest\Query\Filter\FilterTreeBuilder;
 use Dbp\Relay\CoreBundle\Rest\Query\Sort\Sort;
+use Dbp\Relay\CoreConnectorLdapBundle\Ldap\LdapConnection;
 use Dbp\Relay\CoreConnectorLdapBundle\Ldap\LdapException;
 use Dbp\Relay\CoreConnectorLdapBundle\TestUtils\TestLdapConnectionProvider;
+use LdapRecord\Connection;
+use LdapRecord\Query\Builder;
 use PHPUnit\Framework\TestCase;
 
 class LdapConnectionTest extends TestCase
@@ -227,5 +230,95 @@ class LdapConnectionTest extends TestCase
         $this->assertEquals('janed', $entry->getFirstAttributeValue('cn'));
         $this->assertEquals('Jane', $entry->getFirstAttributeValue('givenName'));
         $this->assertEquals('Doelle', $entry->getFirstAttributeValue('sn'));
+    }
+
+    public function testAddFilterToQuery(): void
+    {
+        $builder = new Builder(new Connection());
+        $filter = FilterTreeBuilder::create()
+            ->equals('field', 'value')->createFilter();
+        LdapConnection::addFilterToQuery($builder, $filter->getRootNode());
+        $this->assertSame('(field=\76\61\6c\75\65)', $builder->getQuery());
+
+        $builder = new Builder(new Connection());
+        $filter = FilterTreeBuilder::create()
+            ->not()->equals('field', 'value')->end()->createFilter();
+        LdapConnection::addFilterToQuery($builder, $filter->getRootNode());
+        $this->assertSame('(!(field=\76\61\6c\75\65))', $builder->getQuery());
+
+        $builder = new Builder(new Connection());
+        $filter = FilterTreeBuilder::create()
+            ->iContains('field', 'value')->createFilter();
+        LdapConnection::addFilterToQuery($builder, $filter->getRootNode());
+        $this->assertSame('(field=*\76\61\6c\75\65*)', $builder->getQuery());
+
+        $builder = new Builder(new Connection());
+        $filter = FilterTreeBuilder::create()
+            ->iEndsWith('field', 'value')->createFilter();
+        LdapConnection::addFilterToQuery($builder, $filter->getRootNode());
+        $this->assertSame('(field=*\76\61\6c\75\65)', $builder->getQuery());
+
+        $builder = new Builder(new Connection());
+        $filter = FilterTreeBuilder::create()
+            ->iStartsWith('field', 'value')->createFilter();
+        LdapConnection::addFilterToQuery($builder, $filter->getRootNode());
+        $this->assertSame('(field=\76\61\6c\75\65*)', $builder->getQuery());
+
+        $builder = new Builder(new Connection());
+        $filter = FilterTreeBuilder::create()
+            ->greaterThanOrEqual('field', 42)->createFilter();
+        LdapConnection::addFilterToQuery($builder, $filter->getRootNode());
+        $this->assertSame('(field>=\34\32)', $builder->getQuery());
+
+        $builder = new Builder(new Connection());
+        $filter = FilterTreeBuilder::create()
+            ->lessThanOrEqual('field', 42)->createFilter();
+        LdapConnection::addFilterToQuery($builder, $filter->getRootNode());
+        $this->assertSame('(field<=\34\32)', $builder->getQuery());
+
+        $builder = new Builder(new Connection());
+        $filter = FilterTreeBuilder::create()
+            ->inArray('field', ['value1', 'value2'])->createFilter();
+        LdapConnection::addFilterToQuery($builder, $filter->getRootNode());
+        $this->assertSame('(|(field=\76\61\6c\75\65\31)(field=\76\61\6c\75\65\32))', $builder->getQuery());
+
+        $builder = new Builder(new Connection());
+        $filter = FilterTreeBuilder::create()
+            ->and()
+                ->equals('field', '1')
+                ->equals('field', '2')
+            ->end()->createFilter();
+        LdapConnection::addFilterToQuery($builder, $filter->getRootNode());
+        $this->assertSame('(&(field=\31)(field=\32))', $builder->getQuery());
+
+        $builder = new Builder(new Connection());
+        $filter = FilterTreeBuilder::create()
+            ->and()
+                ->equals('field', '1')
+            ->end()->createFilter();
+        LdapConnection::addFilterToQuery($builder, $filter->getRootNode());
+        $this->assertSame('(field=\31)', $builder->getQuery());
+
+        $builder = new Builder(new Connection());
+        $filter = FilterTreeBuilder::create()
+            ->or()
+                ->equals('field', '1')
+                ->equals('field', '2')
+            ->end()->createFilter();
+        LdapConnection::addFilterToQuery($builder, $filter->getRootNode());
+        $this->assertSame('(|(field=\31)(field=\32))', $builder->getQuery());
+
+        $builder = new Builder(new Connection());
+        $filter = FilterTreeBuilder::create()
+            ->or()
+                ->equals('field', '1')
+            ->end()->createFilter();
+        LdapConnection::addFilterToQuery($builder, $filter->getRootNode());
+        $this->assertSame('(field=\31)', $builder->getQuery());
+
+        $builder = new Builder(new Connection());
+        $filter = FilterTreeBuilder::create()->createFilter();
+        LdapConnection::addFilterToQuery($builder, $filter->getRootNode());
+        $this->assertSame('(objectclass=*)', $builder->getQuery());
     }
 }

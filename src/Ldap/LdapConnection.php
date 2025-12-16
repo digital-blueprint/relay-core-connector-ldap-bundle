@@ -75,7 +75,7 @@ class LdapConnection implements LoggerAwareInterface, LdapConnectionInterface
     /**
      * @throws LdapException
      */
-    private static function addFilterToQuery(Builder $queryBuilder, FilterNode $filterNode): void
+    public static function addFilterToQuery(Builder $queryBuilder, FilterNode $filterNode): void
     {
         if ($filterNode instanceof LogicalFilterNode) {
             switch ($filterNode->getNodeType()) {
@@ -135,10 +135,10 @@ class LdapConnection implements LoggerAwareInterface, LdapConnectionInterface
                     $queryBuilder->whereEndsWith($field, $value);
                     break;
                 case FilterOperatorType::GREATER_THAN_OR_EQUAL_OPERATOR:
-                    $queryBuilder->where($field, $queryBuilder->getGrammar()->getOperators()['>='], $value);
+                    $queryBuilder->where($field, '>=', $value);
                     break;
                 case FilterOperatorType::LESS_THAN_OR_EQUAL_OPERATOR:
-                    $queryBuilder->where($field, $queryBuilder->getGrammar()->getOperators()['<='], $value);
+                    $queryBuilder->where($field, '<=', $value);
                     break;
                 case FilterOperatorType::IN_ARRAY_OPERATOR:
                     self::assertIsNonEmptyArrayValue($value);
