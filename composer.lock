@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "6b3adee7f222202f8a3b264db32bc562",
+    "content-hash": "16dcf383c5597e5188bfed0731b2c764",
     "packages": [
         {
             "name": "api-platform/documentation",
@@ -1162,16 +1162,16 @@
         },
         {
             "name": "directorytree/ldaprecord",
-            "version": "v3.8.5",
+            "version": "v4.0.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/DirectoryTree/LdapRecord.git",
-                "reference": "00e5f088f8c4028d5f398783cccc2e8119a27a65"
+                "reference": "badbf99863992f60353424e986c4b08d239d311b"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/DirectoryTree/LdapRecord/zipball/00e5f088f8c4028d5f398783cccc2e8119a27a65",
-                "reference": "00e5f088f8c4028d5f398783cccc2e8119a27a65",
+                "url": "https://api.github.com/repos/DirectoryTree/LdapRecord/zipball/badbf99863992f60353424e986c4b08d239d311b",
+                "reference": "badbf99863992f60353424e986c4b08d239d311b",
                 "shasum": ""
             },
             "require": {
@@ -1234,7 +1234,7 @@
                     "type": "github"
                 }
             ],
-            "time": "2025-10-06T02:22:34+00:00"
+            "time": "2025-12-13T21:04:41+00:00"
         },
         {
             "name": "doctrine/collections",
