@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+## v0.2.21
+
+- Update directorytree/ldaprecord to v4
+
 ## v0.2.20
 
 - Add support for Symfony 7.4
