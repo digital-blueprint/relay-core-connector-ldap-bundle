@@ -8,6 +8,7 @@ use Dbp\Relay\CoreBundle\Rest\Options;
 use Dbp\Relay\CoreBundle\Rest\Query\Filter\FilterException;
 use Dbp\Relay\CoreBundle\Rest\Query\Filter\FilterTreeBuilder;
 use Dbp\Relay\CoreBundle\Rest\Query\Sort\Sort;
+use Dbp\Relay\CoreBundle\Rest\Query\Sort\SortField;
 use Dbp\Relay\CoreConnectorLdapBundle\Ldap\LdapConnection;
 use Dbp\Relay\CoreConnectorLdapBundle\Ldap\LdapException;
 use Dbp\Relay\CoreConnectorLdapBundle\TestUtils\TestLdapConnectionProvider;
@@ -57,7 +58,8 @@ class LdapConnectionTest extends TestCase
                 'sn' => ['Super'],
             ],
         ]);
-        $entries = $this->testLdapConnectionProvider->getConnection(TestLdapConnectionProvider::DEFAULT_CONNECTION_IDENTIFIER)->getEntries();
+        $entries = $this->testLdapConnectionProvider->getConnection(
+            TestLdapConnectionProvider::DEFAULT_CONNECTION_IDENTIFIER)->getEntries();
         $this->assertCount(3, $entries);
 
         $this->assertEquals('john88', $entries[0]->getFirstAttributeValue('cn'));
@@ -94,8 +96,9 @@ class LdapConnectionTest extends TestCase
         ]);
 
         $options = [];
-        Options::setSort($options, new Sort([Sort::createSortField('cn', Sort::DESCENDING_DIRECTION)]));
-        $entries = $this->testLdapConnectionProvider->getConnection(TestLdapConnectionProvider::DEFAULT_CONNECTION_IDENTIFIER)->getEntries(options: $options);
+        Options::setSort($options, new Sort([Sort::createSortField('cn', SortField::DESCENDING_DIRECTION)]));
+        $entries = $this->testLdapConnectionProvider->getConnection(
+            TestLdapConnectionProvider::DEFAULT_CONNECTION_IDENTIFIER)->getEntries(options: $options);
         $this->assertCount(3, $entries);
 
         $this->assertEquals('sm', $entries[0]->getFirstAttributeValue('cn'));
@@ -138,8 +141,9 @@ class LdapConnectionTest extends TestCase
 
         try {
             $options = [];
-            Options::setSort($options, new Sort([Sort::createSortField('cn', Sort::DESCENDING_DIRECTION)]));
-            $this->testLdapConnectionProvider->getConnection(TestLdapConnectionProvider::DEFAULT_CONNECTION_IDENTIFIER)->getEntries(options: $options);
+            Options::setSort($options, new Sort([Sort::createSortField('cn', SortField::DESCENDING_DIRECTION)]));
+            $this->testLdapConnectionProvider->getConnection(
+                TestLdapConnectionProvider::DEFAULT_CONNECTION_IDENTIFIER)->getEntries(options: $options);
             $this->fail('LdapException not thrown as expected');
         } catch (LdapException $ldapException) {
             $this->assertEquals(LdapException::TOO_MANY_RESULTS_TO_SORT, $ldapException->getCode());

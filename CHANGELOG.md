@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- Update core and adapt (new filter operators, sort update)
+
 ## v0.2.21
 
 - Update directorytree/ldaprecord to v4

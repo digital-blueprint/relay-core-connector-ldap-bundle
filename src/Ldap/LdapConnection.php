@@ -10,7 +10,7 @@ use Dbp\Relay\CoreBundle\Rest\Query\Filter\Nodes\LogicalNode as LogicalFilterNod
 use Dbp\Relay\CoreBundle\Rest\Query\Filter\Nodes\Node as FilterNode;
 use Dbp\Relay\CoreBundle\Rest\Query\Filter\Nodes\NodeType as FilterNodeType;
 use Dbp\Relay\CoreBundle\Rest\Query\Filter\Nodes\OperatorType as FilterOperatorType;
-use Dbp\Relay\CoreBundle\Rest\Query\Sort\Sort;
+use Dbp\Relay\CoreBundle\Rest\Query\Sort\SortField;
 use Dbp\Relay\CoreConnectorLdapBundle\DependencyInjection\Configuration;
 use LdapRecord\Auth\BindException;
 use LdapRecord\Configuration\ConfigurationException;
@@ -128,6 +128,9 @@ class LdapConnection implements LoggerAwareInterface, LdapConnectionInterface
                 case FilterOperatorType::EQUALS_OPERATOR: // TODO: case-sensitivity post-precessing required
                     $modelBuilder->whereEquals($field, (string) $value);
                     break;
+                case FilterOperatorType::NOT_EQUALS_OPERATOR: // TODO: case-sensitivity post-precessing required
+                    $modelBuilder->whereNotEquals($field, (string) $value);
+                    break;
                 case FilterOperatorType::I_STARTS_WITH_OPERATOR:
                     self::assertIsNonEmptyStringValue($value, $filterNode->getOperator());
                     $modelBuilder->whereStartsWith($field, $value);
@@ -148,6 +151,9 @@ class LdapConnection implements LoggerAwareInterface, LdapConnectionInterface
                     break;
                 case FilterOperatorType::IS_NULL_OPERATOR:
                     $modelBuilder->whereHas($field);
+                    break;
+                case FilterOperatorType::IS_NOT_NULL_OPERATOR:
+                    $modelBuilder->whereNotHas($field);
                     break;
                 default:
                     throw new LdapException('unsupported filter condition operator: '.$filterNode->getOperator(),
@@ -249,7 +255,7 @@ class LdapConnection implements LoggerAwareInterface, LdapConnectionInterface
                 }
                 $allResults = $allResults->sortBy(array_map(
                     function ($sortField) {
-                        return [Sort::getPath($sortField), Sort::getDirection($sortField) === Sort::ASCENDING_DIRECTION ? 'asc' : 'desc'];
+                        return [$sortField->getPath(), $sortField->getDirection() === SortField::ASCENDING_DIRECTION ? 'asc' : 'desc'];
                     }, $sortFields));
                 $resultEntries = $allResults->forPage($currentPageNumber, $maxNumItemsPerPage);
             } else {
