@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## v0.2.22
+
 - Update core and adapt (new filter operators, sort update)
 
 ## v0.2.21
