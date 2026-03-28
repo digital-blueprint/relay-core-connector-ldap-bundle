@@ -1165,24 +1165,24 @@
         },
         {
             "name": "directorytree/ldaprecord",
-            "version": "v4.0.2",
+            "version": "v4.0.3",
             "source": {
                 "type": "git",
                 "url": "https://github.com/DirectoryTree/LdapRecord.git",
-                "reference": "fa70e335cf94ef96aecfafe05c2144a2d3bc3b04"
+                "reference": "c8171fb3210dfb58070112f4955ee8e9acbd449e"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/DirectoryTree/LdapRecord/zipball/fa70e335cf94ef96aecfafe05c2144a2d3bc3b04",
-                "reference": "fa70e335cf94ef96aecfafe05c2144a2d3bc3b04",
+                "url": "https://api.github.com/repos/DirectoryTree/LdapRecord/zipball/c8171fb3210dfb58070112f4955ee8e9acbd449e",
+                "reference": "c8171fb3210dfb58070112f4955ee8e9acbd449e",
                 "shasum": ""
             },
             "require": {
                 "ext-iconv": "*",
                 "ext-json": "*",
                 "ext-ldap": "*",
-                "illuminate/collections": "^8.0|^9.0|^10.0|^11.0|^12.0",
-                "illuminate/contracts": "^8.0|^9.0|^10.0|^11.0|^12.0",
+                "illuminate/collections": "^8.0|^9.0|^10.0|^11.0|^12.0|^13.0",
+                "illuminate/contracts": "^8.0|^9.0|^10.0|^11.0|^12.0|^13.0",
                 "nesbot/carbon": "*",
                 "php": ">=8.1",
                 "psr/log": "*",
@@ -1237,7 +1237,7 @@
                     "type": "github"
                 }
             ],
-            "time": "2025-12-29T20:31:24+00:00"
+            "time": "2026-03-18T18:32:45+00:00"
         },
         {
             "name": "doctrine/collections",
