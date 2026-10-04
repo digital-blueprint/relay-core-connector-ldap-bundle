@@ -1174,16 +1174,16 @@
         },
         {
             "name": "directorytree/ldaprecord",
-            "version": "v4.0.8",
+            "version": "v4.1.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/DirectoryTree/LdapRecord.git",
-                "reference": "3c8653a309fdefc15a33b4592191b4e32cfed46c"
+                "reference": "5da13156bf9c444f4a3a325a39a809f1a6d094b7"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/DirectoryTree/LdapRecord/zipball/3c8653a309fdefc15a33b4592191b4e32cfed46c",
-                "reference": "3c8653a309fdefc15a33b4592191b4e32cfed46c",
+                "url": "https://api.github.com/repos/DirectoryTree/LdapRecord/zipball/5da13156bf9c444f4a3a325a39a809f1a6d094b7",
+                "reference": "5da13156bf9c444f4a3a325a39a809f1a6d094b7",
                 "shasum": ""
             },
             "require": {
@@ -1246,7 +1246,7 @@
                     "type": "github"
                 }
             ],
-            "time": "2026-09-17T13:47:11+00:00"
+            "time": "2026-10-04T18:40:36+00:00"
         },
         {
             "name": "doctrine/collections",
